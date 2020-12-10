@@ -29,13 +29,6 @@ new OrpheuFunction:g_OrphFunc_Timer_Birthday;
 
 new OrpheuFunction:g_OrphFunc_CDispenserRefillThinker__Spawn;
 
-//new g_iEntOffsetDiff_Linux = 3;
-//new g_iEntOffsetDiff_Mac = 3;
-
-//new g_iEntOffset_TimerType = 270;
-//new g_iEntOffset_CurrentTeamNumber = 74;
-//new g_iEntOffset_Weapon = 40;
-
 new bool:g_bInDispenserTouchHook;
 new g_iCreatedEntityDuringDispenserTouchHook;
 

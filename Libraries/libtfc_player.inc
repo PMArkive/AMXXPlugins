@@ -4,6 +4,66 @@
 #define _libtfc_player_included
 
 
+
+/**
+ * Sets the next time the player is allowed to suicide.
+ * 
+ * @param next_suicide_time		The next time the player is allowed to suicide.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_SetNextSuicideTime(client, Float:next_suicide_time);
+
+/**
+ * Gets the next time the player is allowed to suicide.
+ *
+ * @return		The next time the player is allowed to suicide.
+ */
+native Float:LibTFC_Player_GetNextSuicideTime(client);
+
+
+/**
+ * Sets the team and class the player should be disguised as.
+ * 
+ * @param team			The team to disguise as.
+ * @param class			The class to disguise as.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_SetDisguised(client, TeamTFC:team, PlayerClassTFC:class);
+
+/**
+ * Gets the team the player is disguised as.
+ *
+ * @return		The team the player is disguised as, or TFC_TEAM_NONE if not disguised.
+ */
+native TeamTFC:LibTFC_Player_GetDisguisedAsTeam(client);
+
+/**
+ * Gets the class the player is disguised as.
+ *
+ * @return		The class the player is disguised as, or TFC_CLASS_NONE if not disguised.
+ */
+native PlayerClassTFC:LibTFC_Player_GetDisguisedAsClass(client);
+
+
+/**
+ * Sets a specific target player this player should be disguised as.
+ * 
+ * @param target_player		The player's team and class to disguise as.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_SetDisguisedAsPlayer(client, target_player);
+
+/**
+ * Gets the target player this player is disguised as.
+ *
+ * @return		The target player this player is disguised as, or 0 if not disguised.
+ */
+native LibTFC_Player_GetDisguisedAsPlayer(client);
+
+
 /**
  * Sets the number of flames on the player.
  * Setting to 0 will extinguish the fire, otherwise it acts as the the fire damage amount * 2.
@@ -617,3 +677,20 @@ native LibTFC_Player_SetPlayerClassLast(client, PlayerClassTFC:player_class);
  */
 native PlayerClassTFC:LibTFC_Player_GetPlayerClassLast(client);
 
+
+/**
+ * Sets the player's current class.
+ * 
+ * @param player_class			The class to respawn as.
+ * @param instantly_respawn		Should the player instantly respawn or not.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_SetPlayerClass(client, PlayerClassTFC:player_class, bool:instantly_respawn=false);
+
+/**
+ * Gets the player's current class.
+ *
+ * @return		Class number of the player.
+ */
+native PlayerClassTFC:LibTFC_Player_GetPlayerClass(client);

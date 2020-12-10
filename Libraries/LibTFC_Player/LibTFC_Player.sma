@@ -6,6 +6,7 @@
 #include "../libtfc_const"
 #include "../libtfc_player"
 #include "../libtfc_misc"
+#include "../libtfc_timers"
 
 #define PLUGIN "Lib TFC: Player"
 #define VERSION "0.1"
@@ -14,6 +15,7 @@
 new OrpheuFunction:g_OrphFunc_TeamFortress_TeamGetNoPlayers;
 new OrpheuFunction:g_OrphFunc_TeamFortress_TeamSet;
 new OrpheuFunction:g_OrphFunc_TeamFortress_SetSpeed;
+new OrpheuFunction:g_OrphFunc_ChangeClass;
 
 new bool:g_bIsForceChangingTeams;
 
@@ -26,6 +28,7 @@ public plugin_init()
 	g_OrphFunc_TeamFortress_TeamGetNoPlayers = OrpheuGetFunction("TeamFortress_TeamGetNoPlayers");	// sub_3007BA40
 	g_OrphFunc_TeamFortress_TeamSet = OrpheuGetFunction("TeamFortress_TeamSet", "CBasePlayer");	// sub_30046D90
 	g_OrphFunc_TeamFortress_SetSpeed = OrpheuGetFunction("TeamFortress_SetSpeed", "CBasePlayer");	// sub_30046540
+	g_OrphFunc_ChangeClass = OrpheuGetFunction("ChangeClass", "CBasePlayer");	// sub_30044F60
 	
 	OrpheuRegisterHook(g_OrphFunc_TeamFortress_TeamGetNoPlayers, "OnOrph_TeamFortress_TeamGetNoPlayers", OrpheuHookPre);
 }
@@ -33,6 +36,9 @@ public plugin_init()
 public plugin_natives()
 {
 	register_library("libtfc_player");
+	
+	register_native("LibTFC_Player_SetPlayerClass", "_LibTFC_Player_SetPlayerClass");
+	register_native("LibTFC_Player_GetPlayerClass", "_LibTFC_Player_GetPlayerClass");
 	
 	register_native("LibTFC_Player_SetPlayerClassNext", "_LibTFC_Player_SetPlayerClassNext");
 	register_native("LibTFC_Player_GetPlayerClassNext", "_LibTFC_Player_GetPlayerClassNext");
@@ -139,6 +145,46 @@ public plugin_natives()
 	register_native("LibTFC_Player_SetNumFlames", "_LibTFC_Player_SetNumFlames");
 	register_native("LibTFC_Player_GetNumFlames", "_LibTFC_Player_GetNumFlames");
 	register_native("LibTFC_Player_Ignite", "_LibTFC_Player_Ignite");
+	
+	register_native("LibTFC_Player_SetDisguised", "_LibTFC_Player_SetDisguised");
+	register_native("LibTFC_Player_GetDisguisedAsTeam", "_LibTFC_Player_GetDisguisedAsTeam");
+	register_native("LibTFC_Player_GetDisguisedAsClass", "_LibTFC_Player_GetDisguisedAsClass");
+	
+	register_native("LibTFC_Player_SetDisguisedAsPlayer", "_LibTFC_Player_SetDisguisedAsPlayer");
+	register_native("LibTFC_Player_GetDisguisedAsPlayer", "_LibTFC_Player_GetDisguisedAsPlayer");
+	
+	register_native("LibTFC_Player_SetNextSuicideTime", "_LibTFC_Player_SetNextSuicideTime");
+	register_native("LibTFC_Player_GetNextSuicideTime", "_LibTFC_Player_GetNextSuicideTime");
+}
+
+
+public _LibTFC_Player_SetDisguisedAsPlayer(iPlugin, iParams)
+{
+	new iClient = get_param(1);
+	new iTarget = get_param(2);
+	LibTFC_Timers_CreateTimer(iClient, TFC_TIMER_FINISH_DISGUISING, 0.0, _:GetCurrentTeam(iTarget), _:GetPlayerClass(iTarget));
+	set_ent_data_entity(iClient, "CBaseEntity", "undercover_target", iTarget);
+}
+
+public _LibTFC_Player_GetDisguisedAsPlayer(iPlugin, iParams)
+{
+	return max(0, get_ent_data_entity(get_param(1), "CBaseEntity", "undercover_target"));
+}
+
+
+public _LibTFC_Player_SetDisguised(iPlugin, iParams)
+{
+	LibTFC_Timers_CreateTimer(get_param(1), TFC_TIMER_FINISH_DISGUISING, 0.0, get_param(2), get_param(3));
+}
+
+public TeamTFC:_LibTFC_Player_GetDisguisedAsTeam(iPlugin, iParams)
+{
+	return TeamTFC:get_ent_data(get_param(1), "CBaseEntity", "undercover_team");
+}
+
+public PlayerClassTFC:_LibTFC_Player_GetDisguisedAsClass(iPlugin, iParams)
+{
+	return PlayerClassTFC:get_ent_data(get_param(1), "CBaseEntity", "undercover_skin");
 }
 
 
@@ -293,7 +339,12 @@ public bool:_LibTFC_Player_GetHasDispenser(iPlugin, iParams)
 
 public _LibTFC_Player_SetRespawnTime(iPlugin, iParams)
 {
-	set_ent_data_float(get_param(1), "CBaseEntity", "respawn_time", get_param_f(2));
+	SetRespawnTime(get_param(1), get_param_f(2));
+}
+
+SetRespawnTime(iClient, Float:fRespawnTime)
+{
+	set_ent_data_float(iClient, "CBaseEntity", "respawn_time", fRespawnTime);
 }
 
 public Float:_LibTFC_Player_GetRespawnTime(iPlugin, iParams)
@@ -706,6 +757,22 @@ public _LibTFC_Player_GetPlayerClassNext(iPlugin, iParams)
 }
 
 
+public _LibTFC_Player_SetNextSuicideTime(iPlugin, iParams)
+{
+	SetNextSuicideTime(get_param(1), get_param_f(2));
+}
+
+SetNextSuicideTime(iClient, Float:fNextSuicideTime)
+{
+	set_ent_data_float(iClient, "CBasePlayer", "m_fNextSuicideTime", fNextSuicideTime);
+}
+
+public Float:_LibTFC_Player_GetNextSuicideTime(iPlugin, iParams)
+{
+	return get_ent_data_float(get_param(1), "CBasePlayer", "m_fNextSuicideTime");
+}
+
+
 public _LibTFC_Player_SetNextTeamOrClassChange(iPlugin, iParams)
 {
 	SetNextTeamOrClassChange(get_param(1), get_param_f(2));
@@ -765,4 +832,26 @@ bool:ChangeTeam(iClient, TeamTFC:newTeam)
 TeamTFC:GetCurrentTeam(iClient)
 {
 	return TeamTFC:get_ent_data(iClient, "CBaseEntity", "team_no");
+}
+
+
+public bool:_LibTFC_Player_SetPlayerClass(iPlugin, iParams)
+{
+	new iClient = get_param(1);
+	SetNextTeamOrClassChange(iClient, 0.0);
+	SetNextSuicideTime(iClient, 0.0);
+	OrpheuCall(g_OrphFunc_ChangeClass, iClient, get_param(2));
+	
+	if(get_param(3))
+		SetRespawnTime(iClient, 0.0);
+}
+
+public PlayerClassTFC:_LibTFC_Player_GetPlayerClass(iPlugin, iParams)
+{
+	return GetPlayerClass(get_param(1));
+}
+
+PlayerClassTFC:GetPlayerClass(iClient)
+{
+	return PlayerClassTFC:entity_get_int(iClient, EV_INT_playerclass);
 }
