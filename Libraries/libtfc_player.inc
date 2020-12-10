@@ -4,6 +4,47 @@
 #define _libtfc_player_included
 
 
+/**
+ * Sets the number of flames on the player.
+ * Setting to 0 will extinguish the fire, otherwise it acts as the the fire damage amount * 2.
+ * Player's can't take flame damage if they have TFC_ARMORCLASS_CERAMIC set.
+ * This is used in game logic only and not a visual flame count.
+ * Cannot ignite if player is underwater.
+ * 
+ * @param num_flames		The number of flames on the player.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_SetNumFlames(client, num_flames);
+
+/**
+ * Gets the number of flames on the player.
+ *
+ * @return		The number of flames on the player.
+ */
+native LibTFC_Player_GetNumFlames(client);
+
+/**
+ * Ignites the player catching them on fire.
+ * You can call LibTFC_Player_SetNumFlames() directly after this to increase flame damage.
+ * 
+ * @param inflictor				The entity that attacked this player to ignite them.
+ * @param remove_ceramic_armor	If a player's ceramic armor should be removed or not.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_Ignite(client, inflictor=0, bool:remove_ceramic_armor=false);
+
+
+/**
+ * Calls the CBasePlayer::TeamFortress_SetSpeed game function.
+ * This function will set the player's speed according to certain attributes on that player.
+ * Ex: If you set TFC_STATE_TRANQUILISED in a player's state mask they will need this function called.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_CallSetSpeed(client);
+
 
 /**
  * Sets the team number of the medic that infected this player.

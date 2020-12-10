@@ -144,7 +144,7 @@ enum TimerTypeTFC
 	* 
 	* Creation usage:
 	* ---
-	* LibTFC_Timers_CreateTimer(player_setting_detpack, TFC_TIMER_SET_DETPACK, seconds_before_detpack_is_set, seconds_before_detpack_explodes);
+	* LibTFC_Timers_CreateTimer(player_setting_detpack, TFC_TIMER_SET_DETPACK, seconds_before_detpack_is_set, seconds_before_detpack_explodes, should_freeze_player);
 	*/
 	TFC_TIMER_SET_DETPACK			= 9,
 	
@@ -168,7 +168,7 @@ enum TimerTypeTFC
 	* 
 	* Creation usage:
 	* ---
-	* LibTFC_Timers_CreateTimer(player_thats_building, TFC_TIMER_FINISHED_BUILDING, seconds_before_build_completes, entity_being_built);
+	* LibTFC_Timers_CreateTimer(player_thats_building, TFC_TIMER_FINISHED_BUILDING, seconds_before_build_completes, entity_being_built, should_freeze_player);
 	*/
 	TFC_TIMER_FINISHED_BUILDING		= 11,
 	

@@ -29,12 +29,12 @@ new OrpheuFunction:g_OrphFunc_Timer_Birthday;
 
 new OrpheuFunction:g_OrphFunc_CDispenserRefillThinker__Spawn;
 
-new g_iEntOffsetDiff_Linux = 3;
-new g_iEntOffsetDiff_Mac = 3;
+//new g_iEntOffsetDiff_Linux = 3;
+//new g_iEntOffsetDiff_Mac = 3;
 
-new g_iEntOffset_TimerType = 270;
-new g_iEntOffset_CurrentTeamNumber = 74;
-new g_iEntOffset_Weapon = 40;
+//new g_iEntOffset_TimerType = 270;
+//new g_iEntOffset_CurrentTeamNumber = 74;
+//new g_iEntOffset_Weapon = 40;
 
 new bool:g_bInDispenserTouchHook;
 new g_iCreatedEntityDuringDispenserTouchHook;
@@ -130,7 +130,7 @@ FindTimerByOwner(iOwner, TimerTypeTFC:timerType, const szTimerClassName[], iStar
 
 TimerTypeTFC:GetTimerType(iEnt)
 {
-	return TimerTypeTFC:get_pdata_int(iEnt, g_iEntOffset_TimerType, g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
+	return TimerTypeTFC:get_ent_data(iEnt, "CBaseEntity", "timer_type");
 }
 
 
@@ -172,8 +172,8 @@ public _LibTFC_Timers_CreateTimer(iPlugin, iParams)
 		case TFC_TIMER_HALLUCINATION:		InitHallucination(iTimer, iTimerOwner, float(get_param(4)));
 		case TFC_TIMER_TRANQ_END:			InitTranqEnd(iTimer, iTimerOwner);
 		case TFC_TIMER_HEALTH_ROT:			InitHealthRot(iTimer, iTimerOwner, get_param(4));
-		case TFC_TIMER_SET_DETPACK:			InitSetDetpack(iTimer, iTimerOwner, float(get_param(4)));
-		case TFC_TIMER_FINISHED_BUILDING:	InitFinishedBuilding(iTimerOwner, get_param(4));
+		case TFC_TIMER_SET_DETPACK:			InitSetDetpack(iTimer, iTimerOwner, float(get_param(4)), bool:get_param(5));
+		case TFC_TIMER_FINISHED_BUILDING:	InitFinishedBuilding(iTimerOwner, get_param(4), bool:get_param(5));
 		case TFC_TIMER_FINISH_DISGUISING:	InitFinishDisguising(iTimer, iTimerOwner, get_param(4), get_param(5));
 		case TFC_TIMER_DISPENSER_REFILL:	InitDispenserRefill(iTimer, iTimerOwner, get_param(4));
 		case TFC_TIMER_ITEM_TFGOAL_RETURN:	InitItemTFGoalReturn(iTimer, get_param(4));
@@ -186,49 +186,53 @@ public _LibTFC_Timers_CreateTimer(iPlugin, iParams)
 InitTFGoalDoResults(iTimer, iActivatingPlayer, iShouldAddBonuses)
 {
 	entity_set_edict(iTimer, EV_ENT_enemy, iActivatingPlayer);
-	set_pdata_int(iTimer, g_iEntOffset_Weapon, iShouldAddBonuses, g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
+	set_ent_data(iTimer, "CBaseEntity", "weapon", iShouldAddBonuses);
 }
 
 InitItemTFGoalReturn(iTimer, iUnknown)
 {
-	set_pdata_int(iTimer, g_iEntOffset_Weapon, iUnknown, g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
+	set_ent_data(iTimer, "CBaseEntity", "weapon", iUnknown);
 }
 
 InitDispenserRefill(iTimer, iDispenserEntity, iPlayerToRefill)
 {
-	set_pdata_ehandle(iTimer, 1124, iDispenserEntity, g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
-	set_pdata_ehandle(iTimer, 1132, iPlayerToRefill, g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
+	set_ent_data_entity(iTimer, "CDispenserRefillThinker", "m_hDispenser", iDispenserEntity);
+	set_ent_data_entity(iTimer, "CDispenserRefillThinker", "m_hPlayer", iPlayerToRefill);
 	
 	new Float:fOrigin[3];
 	entity_get_vector(iPlayerToRefill, EV_VEC_origin, fOrigin);
-	set_pdata_vector(iTimer, 1140, fOrigin, g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
+	set_ent_data_vector(iTimer, "CDispenserRefillThinker", "m_InitialUsePoint", fOrigin);
 }
 
 InitFinishDisguising(iTimer, iPlayerDisguising, iTeamToDisguiseAs, iClassToDisguiseAs)
 {
 	LibTFC_Player_SetDisguiseType(iPlayerDisguising, TFC_DISGUISE_DISGUISING);
-	set_pdata_int(iTimer, g_iEntOffset_CurrentTeamNumber, iTeamToDisguiseAs, g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
+	set_ent_data(iTimer, "CBaseEntity", "team_no", iTeamToDisguiseAs);
 	entity_set_int(iTimer, EV_INT_skin, iClassToDisguiseAs);
 }
 
-InitFinishedBuilding(iBuildingPlayer, iEntityBeingBuilt)
+InitFinishedBuilding(iBuildingPlayer, iEntityBeingBuilt, bool:bShouldFreezePlayer)
 {
 	LibTFC_Player_SetBuildingEntity(iBuildingPlayer, iEntityBeingBuilt);
 	
-	// TODO: Add argument to check if the player should be stopped while setting.
-	LibTFC_Player_SetIsBuilding(iBuildingPlayer, true);
-	//LibTFC_Player_SetStateMask(iBuildingPlayer, LibTFC_Player_GetStateMask(iBuildingPlayer) | TFC_STATE_CANT_MOVE);
-	// TODO: Call CBasePlayer::TeamFortress_SetSpeed(player)
+	if(bShouldFreezePlayer)
+	{
+		LibTFC_Player_SetIsBuilding(iBuildingPlayer, true);
+		LibTFC_Player_SetStateMask(iBuildingPlayer, LibTFC_Player_GetStateMask(iBuildingPlayer) | TFC_STATE_CANT_MOVE);
+		LibTFC_Player_CallSetSpeed(iBuildingPlayer);
+	}
 }
 
-InitSetDetpack(iTimer, iPlayerSettingDetpack, Float:fSecondsBeforeExplosion)
+InitSetDetpack(iTimer, iPlayerSettingDetpack, Float:fSecondsBeforeExplosion, bool:bShouldFreezePlayer)
 {
 	entity_set_float(iTimer, EV_FL_health, fSecondsBeforeExplosion);
 	
-	// TODO: Add argument to check if the player should be stopped while setting.
-	//LibTFC_Player_SetIsSettingDetpack(iPlayerSettingDetpack, true);
-	//LibTFC_Player_SetStateMask(iPlayerSettingDetpack, LibTFC_Player_GetStateMask(iPlayerSettingDetpack) | TFC_STATE_CANT_MOVE);
-	// TODO: Call CBasePlayer::TeamFortress_SetSpeed(player)
+	if(bShouldFreezePlayer)
+	{
+		LibTFC_Player_SetIsSettingDetpack(iPlayerSettingDetpack, true);
+		LibTFC_Player_SetStateMask(iPlayerSettingDetpack, LibTFC_Player_GetStateMask(iPlayerSettingDetpack) | TFC_STATE_CANT_MOVE);
+		LibTFC_Player_CallSetSpeed(iPlayerSettingDetpack);
+	}
 }
 
 InitHealthRot(iTimer, iRotPlayer, iEntityToRespawnOnRotEnd)
@@ -240,8 +244,9 @@ InitHealthRot(iTimer, iRotPlayer, iEntityToRespawnOnRotEnd)
 InitTranqEnd(iTimer, iTranqedPlayer)
 {
 	LibTFC_Player_SetStateMask(iTranqedPlayer, LibTFC_Player_GetStateMask(iTranqedPlayer) | TFC_STATE_TRANQUILISED);
-	set_pdata_int(iTimer, g_iEntOffset_CurrentTeamNumber, _:((LibTFC_Player_GetTeam(iTranqedPlayer) == TFC_TEAM_BLUE) ? TFC_TEAM_RED : TFC_TEAM_BLUE), g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
-	// TODO: Call CBasePlayer::TeamFortress_SetSpeed(player)
+	
+	set_ent_data(iTimer, "CBaseEntity", "team_no", _:((LibTFC_Player_GetTeam(iTranqedPlayer) == TFC_TEAM_BLUE) ? TFC_TEAM_RED : TFC_TEAM_BLUE));
+	LibTFC_Player_CallSetSpeed(iTranqedPlayer);
 }
 
 InitHallucination(iTimer, iHallucPlayer, Float:fSecondsForHallucToLast)
@@ -250,7 +255,7 @@ InitHallucination(iTimer, iHallucPlayer, Float:fSecondsForHallucToLast)
 	
 	LibTFC_Player_SetStateMask(iHallucPlayer, LibTFC_Player_GetStateMask(iHallucPlayer) | TFC_STATE_HALLUCINATING);
 	entity_set_float(iTimer, EV_FL_health, fSecondsForHallucToLast);
-	set_pdata_int(iTimer, g_iEntOffset_CurrentTeamNumber, _:LibTFC_Player_GetTeam(iHallucPlayer), g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
+	set_ent_data(iTimer, "CBaseEntity", "team_no", _:LibTFC_Player_GetTeam(iHallucPlayer));
 }
 
 InitInfection(iTimer, iInfectedPlayer, iInfecterPlayer)
@@ -299,7 +304,7 @@ CreateTimerTFC(iTimerOwner, TimerTypeTFC:timerType, Float:fInitialThinkDelay)
 		return 0;
 	
 	set_ent_data(iTimer, "CBaseEntity", "m_pfnThink", address);
-	set_pdata_int(iTimer, g_iEntOffset_TimerType, _:timerType, g_iEntOffsetDiff_Linux, g_iEntOffsetDiff_Mac);
+	set_ent_data(iTimer, "CBaseEntity", "timer_type", _:timerType);
 	entity_set_edict(iTimer, EV_ENT_owner, iTimerOwner);
 	entity_set_float(iTimer, EV_FL_nextthink, get_gametime() + fInitialThinkDelay);
 	

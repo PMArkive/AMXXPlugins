@@ -12,9 +12,7 @@
 
 new OrpheuFunction:g_OrphFunc_GetTeamName;
 
-
 new g_msgID_TextMsg;
-
 
 
 public plugin_init()

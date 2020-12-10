@@ -1,6 +1,7 @@
 #include <amxmodx>
 #include <fakemeta>
 #include <engine>
+#include <hamsandwich>
 #include <orpheu>
 #include "../libtfc_const"
 #include "../libtfc_player"
@@ -10,74 +11,11 @@
 #define VERSION "0.1"
 #define AUTHOR "hlstriker"
 
-
-
 new OrpheuFunction:g_OrphFunc_TeamFortress_TeamGetNoPlayers;
 new OrpheuFunction:g_OrphFunc_TeamFortress_TeamSet;
-
+new OrpheuFunction:g_OrphFunc_TeamFortress_SetSpeed;
 
 new bool:g_bIsForceChangingTeams;
-
-
-new g_iClientOffsetDiff_Linux = 3;
-new g_iClientOffsetDiff_Mac = 3;
-
-new g_iClientOffset_PlayerClassNext = 8;
-new g_iClientOffset_PlayerClassLast = 9;
-new g_iClientOffset_ArmorClass = 11;
-new g_iClientOffset_GrenadesPrimaryAmount = 14;
-new g_iClientOffset_GrenadesSecondaryAmount = 15;
-new g_iClientOffset_GrenadesPrimaryType = 16;
-new g_iClientOffset_GrenadesSecondaryType = 17;
-new g_iClientOffset_DisguiseType = 22;
-new g_iClientOffset_IsBuilding = 23;
-new g_iClientOffset_IsSettingDetpack = 24;
-new g_iClientOffset_IsFeigning = 25;
-new g_iClientOffset_IsUnableToSpyOrTeleport = 26;
-new g_iClientOffset_RemovePrimedGrenade = 29;
-new g_iClientOffset_TFState = 35;
-new g_iClientOffset_Items = 36;
-new g_iClientOffset_GrenadePrimedSlot = 38;
-new g_iClientOffset_CurAmmoShells = 53;
-new g_iClientOffset_MaxAmmoShells = 50;
-new g_iClientOffset_CurAmmoNails = 55;
-new g_iClientOffset_MaxAmmoNails = 54;
-new g_iClientOffset_CurAmmoCells = 57;
-new g_iClientOffset_MaxAmmoCells = 56;
-new g_iClientOffset_CurAmmoRockets = 59;
-new g_iClientOffset_MaxAmmoRockets = 58;
-new g_iClientOffset_CurAmmoDetpacks = 51;
-new g_iClientOffset_MaxAmmoDetpacks = 52;
-new g_iClientOffset_ArmorValueMax = 62;
-new g_iClientOffset_CurrentTeamNumber = 74;
-new g_iClientOffset_Lives = 75;
-new g_iClientOffset_InfectionTeamNumber = 76;
-new g_iClientOffset_Score = 77;
-
-new g_iClientOffset_RespawnTime = 78;
-
-new g_iClientOffset_BuildingEntity = 80;
-
-new g_iClientOffset_HasDispenser = 85;
-new g_iClientOffset_HasSentry = 86;
-new g_iClientOffset_HasTeleportEntry = 87;
-new g_iClientOffset_HasTeleportExit = 88;
-
-
-new g_iClientOffset_CurrentWeapon = 90;
-
-
-new g_iClientOffset_LastSaveMeSound = 104;
-
-
-new g_iClientOffset_LegDamage = 108;
-new g_iClientOffset_OldLegDamage = 112;
-
-
-
-
-new g_iClientOffset_NextTeamOrClassChange = 457;
-
 
 
 public plugin_init()
@@ -87,6 +25,7 @@ public plugin_init()
 	
 	g_OrphFunc_TeamFortress_TeamGetNoPlayers = OrpheuGetFunction("TeamFortress_TeamGetNoPlayers");	// sub_3007BA40
 	g_OrphFunc_TeamFortress_TeamSet = OrpheuGetFunction("TeamFortress_TeamSet", "CBasePlayer");	// sub_30046D90
+	g_OrphFunc_TeamFortress_SetSpeed = OrpheuGetFunction("TeamFortress_SetSpeed", "CBasePlayer");	// sub_30046540
 	
 	OrpheuRegisterHook(g_OrphFunc_TeamFortress_TeamGetNoPlayers, "OnOrph_TeamFortress_TeamGetNoPlayers", OrpheuHookPre);
 }
@@ -194,29 +133,72 @@ public plugin_natives()
 	
 	register_native("LibTFC_Player_SetInfectionTeamNumber", "_LibTFC_Player_SetInfectionTeamNumber");
 	register_native("LibTFC_Player_GetInfectionTeamNumber", "_LibTFC_Player_GetInfectionTeamNumber");
+	
+	register_native("LibTFC_Player_CallSetSpeed", "_LibTFC_Player_CallSetSpeed");
+	
+	register_native("LibTFC_Player_SetNumFlames", "_LibTFC_Player_SetNumFlames");
+	register_native("LibTFC_Player_GetNumFlames", "_LibTFC_Player_GetNumFlames");
+	register_native("LibTFC_Player_Ignite", "_LibTFC_Player_Ignite");
 }
 
+
+public _LibTFC_Player_SetNumFlames(iPlugin, iParams)
+{
+	SetNumFlames(get_param(1), get_param(2));
+}
+
+SetNumFlames(iClient, iNumFlames)
+{
+	set_ent_data_float(iClient, "CBaseEntity", "numflames", float(iNumFlames));
+}
+
+public _LibTFC_Player_GetNumFlames(iPlugin, iParams)
+{
+	return floatround(get_ent_data_float(get_param(1), "CBaseEntity", "numflames"));
+}
+
+public _LibTFC_Player_Ignite(iPlugin, iParams)
+{
+	new iClient = get_param(1);
+	new iInflictor = get_param(2);
+	
+	if(get_param(3))
+		SetArmorClassMask(iClient, GetArmorClassMask(iClient) & ~TFC_ARMORCLASS_CERAMIC);
+	
+	ExecuteHam(Ham_TakeDamage, iClient, iInflictor, iInflictor, 0.1, 0x1000000);
+}
+
+
+public _LibTFC_Player_CallSetSpeed(iPlugin, iParams)
+{
+	CallSetSpeed(get_param(1))
+}
+
+CallSetSpeed(iClient)
+{
+	OrpheuCall(g_OrphFunc_TeamFortress_SetSpeed, iClient);
+}
 
 
 public _LibTFC_Player_SetInfectionTeamNumber(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_InfectionTeamNumber, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "infection_team_no", get_param(2));
 }
 
 public TeamTFC:_LibTFC_Player_GetInfectionTeamNumber(iPlugin, iParams)
 {
-	return TeamTFC:get_pdata_int(get_param(1), g_iClientOffset_InfectionTeamNumber, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return TeamTFC:get_ent_data(get_param(1), "CBaseEntity", "infection_team_no");
 }
 
 
 public _LibTFC_Player_SetBuildingEntity(iPlugin, iParams)
 {
-	set_pdata_ehandle(get_param(1), g_iClientOffset_BuildingEntity * 4, max(0, get_param(2)), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data_entity(get_param(1), "CBaseEntity", "building", max(0, get_param(2)));
 }
 
 public _LibTFC_Player_GetBuildingEntity(iPlugin, iParams)
 {
-	return max(0, get_pdata_ehandle(get_param(1), g_iClientOffset_BuildingEntity * 4, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac));
+	return max(0, get_ent_data_entity(get_param(1), "CBaseEntity", "building"));
 }
 
 
@@ -228,115 +210,117 @@ public _LibTFC_Player_SetLegDamage(iPlugin, iParams)
 	if(fNewLegDamage == GetOldLegDamage(iClient))
 		return;
 	
-	set_pdata_float(iClient, g_iClientOffset_LegDamage, fNewLegDamage, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data_float(iClient, "CBaseEntity", "leg_damage", fNewLegDamage);
 	
 	// Set the old leg damage to a value that is not equal to the new leg damage.
 	// This will make the game update the player with the leg damage user message.
-	set_pdata_float(iClient, g_iClientOffset_OldLegDamage, fNewLegDamage + 1.0, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data_float(iClient, "CBaseEntity", "old_leg_damage", fNewLegDamage + 1.0);
+	
+	CallSetSpeed(iClient);
 }
 
 public Float:_LibTFC_Player_GetLegDamage(iPlugin, iParams)
 {
-	return Float:get_pdata_float(get_param(1), g_iClientOffset_LegDamage, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data_float(get_param(1), "CBaseEntity", "leg_damage");
 }
 
 Float:GetOldLegDamage(iClient)
 {
-	return Float:get_pdata_float(iClient, g_iClientOffset_OldLegDamage, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data_float(iClient, "CBaseEntity", "old_leg_damage");
 }
 
 
 public _LibTFC_Player_SetLastMedicCallTime(iPlugin, iParams)
 {
-	set_pdata_float(get_param(1), g_iClientOffset_LastSaveMeSound, get_param_f(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data_float(get_param(1), "CBaseEntity", "last_saveme_sound", get_param_f(2));
 }
 
 public Float:_LibTFC_Player_GetLastMedicCallTime(iPlugin, iParams)
 {
-	return Float:get_pdata_float(get_param(1), g_iClientOffset_LastSaveMeSound, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data_float(get_param(1), "CBaseEntity", "last_saveme_sound");
 }
 
 
 public WeaponTFC:_LibTFC_Player_GetDeployedWeaponID(iPlugin, iParams)
 {
-	return WeaponTFC:floatround(get_pdata_float(get_param(1), g_iClientOffset_CurrentWeapon, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac));
+	return WeaponTFC:floatround(get_ent_data_float(get_param(1), "CBaseEntity", "current_weapon"));
 }
 
 
 public _LibTFC_Player_SetHasTeleporterExit(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_HasTeleportExit, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "has_exit_teleporter", get_param(2));
 }
 
 public bool:_LibTFC_Player_GetHasTeleporterExit(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_HasTeleportExit, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "has_exit_teleporter");
 }
 
 
 public _LibTFC_Player_SetHasTeleporterEntrance(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_HasTeleportEntry, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "has_entry_teleporter", get_param(2));
 }
 
 public bool:_LibTFC_Player_GetHasTeleporterEntrance(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_HasTeleportEntry, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "has_entry_teleporter");
 }
 
 
 public _LibTFC_Player_SetHasSentry(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_HasSentry, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "has_sentry", get_param(2));
 }
 
 public bool:_LibTFC_Player_GetHasSentry(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_HasSentry, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "has_sentry");
 }
 
 
 public _LibTFC_Player_SetHasDispenser(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_HasDispenser, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "has_dispenser", get_param(2));
 }
 
 public bool:_LibTFC_Player_GetHasDispenser(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_HasDispenser, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "has_dispenser");
 }
 
 
 public _LibTFC_Player_SetRespawnTime(iPlugin, iParams)
 {
-	set_pdata_float(get_param(1), g_iClientOffset_RespawnTime, get_param_f(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data_float(get_param(1), "CBaseEntity", "respawn_time", get_param_f(2));
 }
 
 public Float:_LibTFC_Player_GetRespawnTime(iPlugin, iParams)
 {
-	return Float:get_pdata_float(get_param(1), g_iClientOffset_RespawnTime, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return Float:get_ent_data_float(get_param(1), "CBaseEntity", "respawn_time");
 }
 
 
 public _LibTFC_Player_SetScore(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_Score, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "real_frags", get_param(2));
 }
 
 public _LibTFC_Player_GetScore(iPlugin, iParams)
 {
-	return get_pdata_int(get_param(1), g_iClientOffset_Score, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data(get_param(1), "CBaseEntity", "real_frags");
 }
 
 
 public _LibTFC_Player_SetLives(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_Lives, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "lives", get_param(2));
 }
 
 public _LibTFC_Player_GetLives(iPlugin, iParams)
 {
-	return get_pdata_int(get_param(1), g_iClientOffset_Lives, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data(get_param(1), "CBaseEntity", "lives");
 }
 
 
@@ -353,12 +337,12 @@ public Float:_LibTFC_Player_GetArmorValue(iPlugin, iParams)
 
 public _LibTFC_Player_SetArmorValueMax(iPlugin, iParams)
 {
-	set_pdata_float(get_param(1), g_iClientOffset_ArmorValueMax, get_param_f(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data_float(get_param(1), "CBaseEntity", "maxarmor", get_param_f(2));
 }
 
 public Float:_LibTFC_Player_GetArmorValueMax(iPlugin, iParams)
 {
-	return Float:get_pdata_float(get_param(1), g_iClientOffset_ArmorValueMax, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data_float(get_param(1), "CBaseEntity", "maxarmor");
 }
 
 
@@ -370,11 +354,11 @@ public bool:_LibTFC_Player_SetAmmoBackpackMax(iPlugin, iParams)
 	
 	switch(ammoType)
 	{
-		case TFC_AMMOTYPE_SHELLS:	set_pdata_int(iClient, g_iClientOffset_MaxAmmoShells, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_NAILS:	set_pdata_int(iClient, g_iClientOffset_MaxAmmoNails, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_CELLS:	set_pdata_int(iClient, g_iClientOffset_MaxAmmoCells, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_ROCKETS:	set_pdata_int(iClient, g_iClientOffset_MaxAmmoRockets, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_DETPACKS:	set_pdata_int(iClient, g_iClientOffset_MaxAmmoDetpacks, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+		case TFC_AMMOTYPE_SHELLS:	set_ent_data(iClient, "CBaseEntity", "maxammo_shells", iAmount);
+		case TFC_AMMOTYPE_NAILS:	set_ent_data(iClient, "CBaseEntity", "maxammo_nails", iAmount);
+		case TFC_AMMOTYPE_CELLS:	set_ent_data(iClient, "CBaseEntity", "maxammo_cells", iAmount);
+		case TFC_AMMOTYPE_ROCKETS:	set_ent_data(iClient, "CBaseEntity", "maxammo_rockets", iAmount);
+		case TFC_AMMOTYPE_DETPACKS:	set_ent_data(iClient, "CBaseEntity", "maxammo_detpack", iAmount);
 		default: return false;
 	}
 	
@@ -388,11 +372,11 @@ public _LibTFC_Player_GetAmmoBackpackMax(iPlugin, iParams)
 	
 	switch(ammoType)
 	{
-		case TFC_AMMOTYPE_SHELLS:	return get_pdata_int(iClient, g_iClientOffset_MaxAmmoShells, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_NAILS:	return get_pdata_int(iClient, g_iClientOffset_MaxAmmoNails, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_CELLS:	return get_pdata_int(iClient, g_iClientOffset_MaxAmmoCells, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_ROCKETS:	return get_pdata_int(iClient, g_iClientOffset_MaxAmmoRockets, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_DETPACKS:	return get_pdata_int(iClient, g_iClientOffset_MaxAmmoDetpacks, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+		case TFC_AMMOTYPE_SHELLS:	return get_ent_data(iClient, "CBaseEntity", "maxammo_shells");
+		case TFC_AMMOTYPE_NAILS:	return get_ent_data(iClient, "CBaseEntity", "maxammo_nails");
+		case TFC_AMMOTYPE_CELLS:	return get_ent_data(iClient, "CBaseEntity", "maxammo_cells");
+		case TFC_AMMOTYPE_ROCKETS:	return get_ent_data(iClient, "CBaseEntity", "maxammo_rockets");
+		case TFC_AMMOTYPE_DETPACKS:	return get_ent_data(iClient, "CBaseEntity", "maxammo_detpack");
 	}
 	
 	return 0;
@@ -407,11 +391,11 @@ public bool:_LibTFC_Player_SetAmmoBackpack(iPlugin, iParams)
 	
 	switch(ammoType)
 	{
-		case TFC_AMMOTYPE_SHELLS:	set_pdata_int(iClient, g_iClientOffset_CurAmmoShells, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_NAILS:	set_pdata_int(iClient, g_iClientOffset_CurAmmoNails, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_CELLS:	set_pdata_int(iClient, g_iClientOffset_CurAmmoCells, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_ROCKETS:	set_pdata_int(iClient, g_iClientOffset_CurAmmoRockets, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_DETPACKS:	set_pdata_int(iClient, g_iClientOffset_CurAmmoDetpacks, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+		case TFC_AMMOTYPE_SHELLS:	set_ent_data(iClient, "CBaseEntity", "ammo_shells", iAmount);
+		case TFC_AMMOTYPE_NAILS:	set_ent_data(iClient, "CBaseEntity", "ammo_nails", iAmount);
+		case TFC_AMMOTYPE_CELLS:	set_ent_data(iClient, "CBaseEntity", "ammo_cells", iAmount);
+		case TFC_AMMOTYPE_ROCKETS:	set_ent_data(iClient, "CBaseEntity", "ammo_rockets", iAmount);
+		case TFC_AMMOTYPE_DETPACKS:	set_ent_data(iClient, "CBaseEntity", "ammo_detpack", iAmount);
 		default: return false;
 	}
 	
@@ -425,11 +409,11 @@ public _LibTFC_Player_GetAmmoBackpack(iPlugin, iParams)
 	
 	switch(ammoType)
 	{
-		case TFC_AMMOTYPE_SHELLS:	return get_pdata_int(iClient, g_iClientOffset_CurAmmoShells, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_NAILS:	return get_pdata_int(iClient, g_iClientOffset_CurAmmoNails, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_CELLS:	return get_pdata_int(iClient, g_iClientOffset_CurAmmoCells, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_ROCKETS:	return get_pdata_int(iClient, g_iClientOffset_CurAmmoRockets, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_AMMOTYPE_DETPACKS:	return get_pdata_int(iClient, g_iClientOffset_CurAmmoDetpacks, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+		case TFC_AMMOTYPE_SHELLS:	return get_ent_data(iClient, "CBaseEntity", "ammo_shells");
+		case TFC_AMMOTYPE_NAILS:	return get_ent_data(iClient, "CBaseEntity", "ammo_nails");
+		case TFC_AMMOTYPE_CELLS:	return get_ent_data(iClient, "CBaseEntity", "ammo_cells");
+		case TFC_AMMOTYPE_ROCKETS:	return get_ent_data(iClient, "CBaseEntity", "ammo_rockets");
+		case TFC_AMMOTYPE_DETPACKS:	return get_ent_data(iClient, "CBaseEntity", "ammo_detpack");
 	}
 	
 	return 0;
@@ -488,7 +472,7 @@ Float:GetArmorTypeAbsorptionPercent(iClient)
 
 public _LibTFC_Player_SetItemsMask(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_Items, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "items", get_param(2));
 }
 
 public _LibTFC_Player_GetItemsMask(iPlugin, iParams)
@@ -498,7 +482,7 @@ public _LibTFC_Player_GetItemsMask(iPlugin, iParams)
 
 GetItemsMask(iClient)
 {
-	return get_pdata_int(iClient, g_iClientOffset_Items, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data(iClient, "CBaseEntity", "items");
 }
 
 
@@ -509,29 +493,29 @@ public _LibTFC_Player_SetRemovePrimedGrenade(iPlugin, iParams)
 
 SetRemovePrimedGrenade(iClient, bool:bShouldRemove)
 {
-	set_pdata_int(iClient, g_iClientOffset_RemovePrimedGrenade, bShouldRemove, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(iClient, "CBaseEntity", "bRemoveGrenade", bShouldRemove);
 }
 
 public bool:_LibTFC_Player_IsRemovingPrimedGrenade(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_RemovePrimedGrenade, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "bRemoveGrenade");
 }
 
 
 public _LibTFC_Player_SetGrenadePrimedSlot(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_GrenadePrimedSlot, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "m_iPrimedGrenType", get_param(2));
 }
 
 public _LibTFC_Player_GetGrenadePrimedSlot(iPlugin, iParams)
 {
-	return get_pdata_int(get_param(1), g_iClientOffset_GrenadePrimedSlot, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data(get_param(1), "CBaseEntity", "m_iPrimedGrenType");
 }
 
 
 public _LibTFC_Player_SetStateMask(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_TFState, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "tfstate", get_param(2));
 }
 
 public _LibTFC_Player_GetStateMask(iPlugin, iParams)
@@ -541,62 +525,62 @@ public _LibTFC_Player_GetStateMask(iPlugin, iParams)
 
 GetStateMask(iClient)
 {
-	return get_pdata_int(iClient, g_iClientOffset_TFState, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data(iClient, "CBaseEntity", "tfstate");
 }
 
 
 public _LibTFC_Player_SetUnableToSpyOrTeleport(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_IsUnableToSpyOrTeleport, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "is_unableto_spy_or_teleport", get_param(2));
 }
 
 public bool:_LibTFC_Player_GetUnableToSpyOrTeleport(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_IsUnableToSpyOrTeleport, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "is_unableto_spy_or_teleport");
 }
 
 
 public _LibTFC_Player_SetIsFeigning(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_IsFeigning, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "is_feigning", get_param(2));
 }
 
 public bool:_LibTFC_Player_GetIsFeigning(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_IsFeigning, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "is_feigning");
 }
 
 
 public _LibTFC_Player_SetIsSettingDetpack(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_IsSettingDetpack, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "is_detpacking", get_param(2));
 }
 
 public bool:_LibTFC_Player_GetIsSettingDetpack(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_IsSettingDetpack, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "is_detpacking");
 }
 
 
 public _LibTFC_Player_SetIsBuilding(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_IsBuilding, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "is_building", get_param(2));
 }
 
 public bool:_LibTFC_Player_GetIsBuilding(iPlugin, iParams)
 {
-	return bool:get_pdata_int(get_param(1), g_iClientOffset_IsBuilding, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return bool:get_ent_data(get_param(1), "CBaseEntity", "is_building");
 }
 
 
 public _LibTFC_Player_SetDisguiseType(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_DisguiseType, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "is_undercover", get_param(2));
 }
 
 public DisguiseTFC:_LibTFC_Player_GetDisguiseType(iPlugin, iParams)
 {
-	return DisguiseTFC:get_pdata_int(get_param(1), g_iClientOffset_DisguiseType, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return DisguiseTFC:get_ent_data(get_param(1), "CBaseEntity", "is_undercover");
 }
 
 
@@ -606,10 +590,12 @@ public bool:_LibTFC_Player_SetGrenadeType(iPlugin, iParams)
 	new GrenadeSlotTFC:grenadeSlot = GrenadeSlotTFC:get_param(2);
 	new GrenadeTypeTFC:grenadeType = GrenadeTypeTFC:get_param(3);
 	
+	
+	
 	switch(grenadeSlot)
 	{
-		case TFC_GRENADESLOT_PRIMARY:	set_pdata_int(iClient, g_iClientOffset_GrenadesPrimaryType, _:grenadeType, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_GRENADESLOT_SECONDARY:	set_pdata_int(iClient, g_iClientOffset_GrenadesSecondaryType, _:grenadeType, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+		case TFC_GRENADESLOT_PRIMARY:	set_ent_data(iClient, "CBaseEntity", "tp_grenades_1", _:grenadeType);
+		case TFC_GRENADESLOT_SECONDARY:	set_ent_data(iClient, "CBaseEntity", "tp_grenades_2", _:grenadeType);
 		default: return false;
 	}
 	
@@ -623,8 +609,8 @@ public GrenadeTypeTFC:_LibTFC_Player_GetGrenadeType(iPlugin, iParams)
 	
 	switch(grenadeSlot)
 	{
-		case TFC_GRENADESLOT_PRIMARY:	return GrenadeTypeTFC:get_pdata_int(iClient, g_iClientOffset_GrenadesPrimaryType, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_GRENADESLOT_SECONDARY:	return GrenadeTypeTFC:get_pdata_int(iClient, g_iClientOffset_GrenadesSecondaryType, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+		case TFC_GRENADESLOT_PRIMARY:	return GrenadeTypeTFC:get_ent_data(iClient, "CBaseEntity", "tp_grenades_1");
+		case TFC_GRENADESLOT_SECONDARY:	return GrenadeTypeTFC:get_ent_data(iClient, "CBaseEntity", "tp_grenades_2");
 	}
 	
 	return TFC_GRENTYPE_NONE;
@@ -654,8 +640,8 @@ public bool:_LibTFC_Player_SetGrenadeAmount(iPlugin, iParams)
 	
 	switch(grenadeSlot)
 	{
-		case TFC_GRENADESLOT_PRIMARY:	set_pdata_int(iClient, g_iClientOffset_GrenadesPrimaryAmount, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_GRENADESLOT_SECONDARY:	set_pdata_int(iClient, g_iClientOffset_GrenadesSecondaryAmount, iAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+		case TFC_GRENADESLOT_PRIMARY:	set_ent_data(iClient, "CBaseEntity", "no_grenades_1", iAmount);
+		case TFC_GRENADESLOT_SECONDARY:	set_ent_data(iClient, "CBaseEntity", "no_grenades_2", iAmount);
 		default: return false;
 	}
 	
@@ -669,8 +655,8 @@ public _LibTFC_Player_GetGrenadeAmount(iPlugin, iParams)
 	
 	switch(grenadeSlot)
 	{
-		case TFC_GRENADESLOT_PRIMARY:	return get_pdata_int(iClient, g_iClientOffset_GrenadesPrimaryAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
-		case TFC_GRENADESLOT_SECONDARY:	return get_pdata_int(iClient, g_iClientOffset_GrenadesSecondaryAmount, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+		case TFC_GRENADESLOT_PRIMARY:	return get_ent_data(iClient, "CBaseEntity", "no_grenades_1");
+		case TFC_GRENADESLOT_SECONDARY:	return get_ent_data(iClient, "CBaseEntity", "no_grenades_2");
 	}
 	
 	return 0;
@@ -679,34 +665,44 @@ public _LibTFC_Player_GetGrenadeAmount(iPlugin, iParams)
 
 public _LibTFC_Player_SetArmorClassMask(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_ArmorClass, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	SetArmorClassMask(get_param(1), get_param(2));
+}
+
+public SetArmorClassMask(iClient, iArmorClassMask)
+{
+	set_ent_data(iClient, "CBaseEntity", "armorclass", iArmorClassMask);
 }
 
 public _LibTFC_Player_GetArmorClassMask(iPlugin, iParams)
 {
-	return get_pdata_int(get_param(1), g_iClientOffset_ArmorClass, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	GetArmorClassMask(get_param(1));
+}
+
+GetArmorClassMask(iClient)
+{
+	return get_ent_data(iClient, "CBaseEntity", "armorclass");
 }
 
 
 public _LibTFC_Player_SetPlayerClassLast(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_PlayerClassLast, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "lastpc", get_param(2));
 }
 
 public _LibTFC_Player_GetPlayerClassLast(iPlugin, iParams)
 {
-	return get_pdata_int(get_param(1), g_iClientOffset_PlayerClassLast, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data(get_param(1), "CBaseEntity", "lastpc");
 }
 
 
 public _LibTFC_Player_SetPlayerClassNext(iPlugin, iParams)
 {
-	set_pdata_int(get_param(1), g_iClientOffset_PlayerClassNext, get_param(2), g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data(get_param(1), "CBaseEntity", "nextpc", get_param(2));
 }
 
 public _LibTFC_Player_GetPlayerClassNext(iPlugin, iParams)
 {
-	return get_pdata_int(get_param(1), g_iClientOffset_PlayerClassNext, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data(get_param(1), "CBaseEntity", "nextpc");
 }
 
 
@@ -717,12 +713,12 @@ public _LibTFC_Player_SetNextTeamOrClassChange(iPlugin, iParams)
 
 SetNextTeamOrClassChange(iClient, Float:fNextTeamOrClassChangeTime)
 {
-	set_pdata_float(iClient, g_iClientOffset_NextTeamOrClassChange, fNextTeamOrClassChangeTime, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	set_ent_data_float(iClient, "CBasePlayer", "m_fNextTeamOrClassChange", fNextTeamOrClassChangeTime);
 }
 
 public Float:_LibTFC_Player_GetNextTeamOrClassChange(iPlugin, iParams)
 {
-	return Float:get_pdata_float(get_param(1), g_iClientOffset_NextTeamOrClassChange, g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return get_ent_data_float(get_param(1), "CBasePlayer", "m_fNextTeamOrClassChange");
 }
 
 
@@ -768,5 +764,5 @@ bool:ChangeTeam(iClient, TeamTFC:newTeam)
 
 TeamTFC:GetCurrentTeam(iClient)
 {
-	return TeamTFC:get_pdata_int(iClient, g_iClientOffset_CurrentTeamNumber , g_iClientOffsetDiff_Linux, g_iClientOffsetDiff_Mac);
+	return TeamTFC:get_ent_data(iClient, "CBaseEntity", "team_no");
 }
