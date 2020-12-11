@@ -6,6 +6,43 @@
 
 
 /**
+ * Sets the player's number of team kills.
+ * 
+ * @param num_team_kills		The player's number of team kills.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_SetNumTeamKills(client, num_team_kills);
+
+/**
+ * Gets the player's number of team kills.
+ *
+ * @return		The player's number of team kills.
+ */
+native LibTFC_Player_GetNumTeamKills(client);
+
+
+/**
+ * Sets the player's battle ID.
+ * This is the ID that associates a player with their team, class, and score during a match (tfc_clanbattle 1).
+ * This way if a player disconnects during a match someone can reconnect with their attributes.
+ * Ex: New player types "setinfo tf_id XXX" in console before connecting where XXX is the battle ID.
+ * 
+ * @param battle_id		The player's battle ID.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_SetBattleID(client, battle_id);
+
+/**
+ * Gets the player's battle ID.
+ *
+ * @return		The player's battle ID.
+ */
+native LibTFC_Player_GetBattleID(client);
+
+
+/**
  * Sets the next time the player is allowed to suicide.
  * 
  * @param next_suicide_time		The next time the player is allowed to suicide.

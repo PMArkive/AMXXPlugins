@@ -155,6 +155,34 @@ public plugin_natives()
 	
 	register_native("LibTFC_Player_SetNextSuicideTime", "_LibTFC_Player_SetNextSuicideTime");
 	register_native("LibTFC_Player_GetNextSuicideTime", "_LibTFC_Player_GetNextSuicideTime");
+	
+	register_native("LibTFC_Player_SetBattleID", "_LibTFC_Player_SetBattleID");
+	register_native("LibTFC_Player_GetBattleID", "_LibTFC_Player_GetBattleID");
+	
+	register_native("LibTFC_Player_SetNumTeamKills", "_LibTFC_Player_SetNumTeamKills");
+	register_native("LibTFC_Player_GetNumTeamKills", "_LibTFC_Player_GetNumTeamKills");
+}
+
+
+public _LibTFC_Player_SetNumTeamKills(iPlugin, iParams)
+{
+	set_ent_data(get_param(1), "CBaseEntity", "teamkills", get_param(2));
+}
+
+public _LibTFC_Player_GetNumTeamKills(iPlugin, iParams)
+{
+	return get_ent_data(get_param(1), "CBaseEntity", "teamkills");
+}
+
+
+public _LibTFC_Player_SetBattleID(iPlugin, iParams)
+{
+	set_ent_data(get_param(1), "CBaseEntity", "tf_id", get_param(2));
+}
+
+public _LibTFC_Player_GetBattleID(iPlugin, iParams)
+{
+	return get_ent_data(get_param(1), "CBaseEntity", "tf_id");
 }
 
 
@@ -222,7 +250,7 @@ public _LibTFC_Player_CallSetSpeed(iPlugin, iParams)
 
 CallSetSpeed(iClient)
 {
-	OrpheuCall(g_OrphFunc_TeamFortress_SetSpeed, iClient);
+	OrpheuCallSuper(g_OrphFunc_TeamFortress_SetSpeed, iClient);
 }
 
 
@@ -823,7 +851,7 @@ bool:ChangeTeam(iClient, TeamTFC:newTeam)
 	
 	// Try change team.
 	g_bIsForceChangingTeams = true;
-	new bool:bSuccess = bool:OrpheuCall(g_OrphFunc_TeamFortress_TeamSet, iClient, _:newTeam);
+	new bool:bSuccess = bool:OrpheuCallSuper(g_OrphFunc_TeamFortress_TeamSet, iClient, _:newTeam);
 	g_bIsForceChangingTeams = false;
 	
 	return bSuccess;
@@ -840,7 +868,7 @@ public bool:_LibTFC_Player_SetPlayerClass(iPlugin, iParams)
 	new iClient = get_param(1);
 	SetNextTeamOrClassChange(iClient, 0.0);
 	SetNextSuicideTime(iClient, 0.0);
-	OrpheuCall(g_OrphFunc_ChangeClass, iClient, get_param(2));
+	OrpheuCallSuper(g_OrphFunc_ChangeClass, iClient, get_param(2));
 	
 	if(get_param(3))
 		SetRespawnTime(iClient, 0.0);
