@@ -1,0 +1,18 @@
+{
+	"name" : "Timer_FinishedBuilding",
+	"class" : "CBaseEntity",
+	"library" : "mod",
+	"identifiers":
+	[
+		{
+			"os" : "windows",
+			"mod" : "tfc",
+			"value" : "?Timer_FinishedBuilding@CBaseEntity@@QAEXXZ"
+		},
+		{
+			"os" : "linux",
+			"mod" : "tfc",
+			"value" : ""
+		}
+	]
+}

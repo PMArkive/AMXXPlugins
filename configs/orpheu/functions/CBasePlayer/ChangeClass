@@ -1,0 +1,25 @@
+{
+	"name" : "ChangeClass",
+	"class" : "CBasePlayer",
+	"library" : "mod",
+	"arguments" :
+	[
+		{
+			"type" : "long",
+			"info" : "class number"
+		}
+    ],
+	"identifiers":
+	[
+		{
+			"os" : "windows",
+			"mod" : "tfc",
+			"value" : [0x55,0x8B,0xEC,0x83,0xE4,0xF8,0x83,0xEC,0x1C,0x53,0x56,0x8B,0xF1,0x57,0x8B,0x7D]
+		},
+		{
+			"os" : "linux",
+			"mod" : "tfc",
+			"value" : ""
+		}
+	]
+}

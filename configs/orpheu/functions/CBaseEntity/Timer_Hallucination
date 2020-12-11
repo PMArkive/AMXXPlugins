@@ -1,0 +1,18 @@
+{
+	"name" : "Timer_Hallucination",
+	"class" : "CBaseEntity",
+	"library" : "mod",
+	"identifiers":
+	[
+		{
+			"os" : "windows",
+			"mod" : "tfc",
+			"value" : "?Timer_Hallucination@CBaseEntity@@QAEXXZ"
+		},
+		{
+			"os" : "linux",
+			"mod" : "tfc",
+			"value" : ""
+		}
+	]
+}
