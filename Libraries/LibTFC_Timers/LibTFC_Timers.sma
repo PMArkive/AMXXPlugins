@@ -64,12 +64,12 @@ public plugin_natives()
 {
 	register_library("libtfc_timers");
 	
-	register_native("LibTFC_Timers_FindTimerByOwner", "_LibTFC_Timers_FindTimerByOwner");
+	register_native("LibTFC_Timers_FindTimer", "_LibTFC_Timers_FindTimer");
 	register_native("LibTFC_Timers_CreateTimer", "_LibTFC_Timers_CreateTimer");
 }
 
 
-public _LibTFC_Timers_FindTimerByOwner(iPlugin, iParams)
+public _LibTFC_Timers_FindTimer(iPlugin, iParams)
 {
 	new iTimerOwner = get_param(1);
 	new TimerTypeTFC:timerType = TimerTypeTFC:get_param(2);
@@ -78,13 +78,13 @@ public _LibTFC_Timers_FindTimerByOwner(iPlugin, iParams)
 	new iTimer1 = 0;
 	if(timerType == TFC_TIMER_NONE || timerType == TFC_TIMER_TK_AUTO_KICK_RESET)
 	{
-		iTimer1 = FindTimerByOwner(iTimerOwner, timerType, "ak_timer", iStartEnt);
+		iTimer1 = FindTimer(iTimerOwner, timerType, "ak_timer", iStartEnt);
 	}
 	
 	new iTimer2 = 0;
 	if(timerType == TFC_TIMER_NONE || timerType != TFC_TIMER_TK_AUTO_KICK_RESET)
 	{
-		iTimer2 = FindTimerByOwner(iTimerOwner, timerType, "timer", iStartEnt);
+		iTimer2 = FindTimer(iTimerOwner, timerType, "timer", iStartEnt);
 	}
 	
 	// Return the timer with the lowest index.
@@ -104,7 +104,7 @@ public _LibTFC_Timers_FindTimerByOwner(iPlugin, iParams)
 	return 0;
 }
 
-FindTimerByOwner(iOwner, TimerTypeTFC:timerType, const szTimerClassName[], iStartEnt)
+FindTimer(iOwner, TimerTypeTFC:timerType, const szTimerClassName[], iStartEnt)
 {
 	new iTimer = iStartEnt;
 	while((iTimer = find_ent_by_class(iTimer, szTimerClassName)) != 0)

@@ -298,7 +298,7 @@ enum TimerTypeTFC
 
 
 /**
- * Finds a timer by owner and by timer type.
+ * Finds a timer by owner and/or by timer type.
  * If owner is -1 and timer_type is TFC_TIMER_NONE then this function will return any timer.
  * 
  * @param owner				The timer's owner entity. If the owner is -1 then it will only do a timer_type search.
@@ -307,7 +307,7 @@ enum TimerTypeTFC
  *
  * @return		The timer's entity index found, 0 otherwise.
  */
-native LibTFC_Timers_FindTimerByOwner(owner=-1, TimerTypeTFC:timer_type=TFC_TIMER_NONE, start_search_ent=-1);
+native LibTFC_Timers_FindTimer(owner=-1, TimerTypeTFC:timer_type=TFC_TIMER_NONE, start_search_ent=-1);
 
 
 /**
