@@ -4,6 +4,15 @@
 #define _libtfc_player_included
 
 
+/**
+ * Checks to see if an entity is a player.
+ *
+ * @param entity		The entity to check.
+ * 
+ * @return		Returns true if the entity is a player, false otherwise.
+ */
+native LibTFC_Player_IsPlayer(entity);
+
 
 /**
  * Sets the player's number of team kills.

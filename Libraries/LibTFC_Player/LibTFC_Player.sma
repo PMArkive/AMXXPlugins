@@ -18,12 +18,15 @@ new OrpheuFunction:g_OrphFunc_TeamFortress_SetSpeed;
 new OrpheuFunction:g_OrphFunc_ChangeClass;
 
 new bool:g_bIsForceChangingTeams;
+new g_iMaxPlayers;
 
 
 public plugin_init()
 {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 	register_cvar("libtfc_player_version", VERSION, FCVAR_SERVER|FCVAR_SPONLY);
+
+	g_iMaxPlayers = get_maxplayers();
 	
 	g_OrphFunc_TeamFortress_TeamGetNoPlayers = OrpheuGetFunction("TeamFortress_TeamGetNoPlayers");	// sub_3007BA40
 	g_OrphFunc_TeamFortress_TeamSet = OrpheuGetFunction("TeamFortress_TeamSet", "CBasePlayer");	// sub_30046D90
@@ -37,6 +40,8 @@ public plugin_natives()
 {
 	register_library("libtfc_player");
 	
+	register_native("LibTFC_Player_IsPlayer", "_LibTFC_Player_IsPlayer");
+
 	register_native("LibTFC_Player_SetPlayerClass", "_LibTFC_Player_SetPlayerClass");
 	register_native("LibTFC_Player_GetPlayerClass", "_LibTFC_Player_GetPlayerClass");
 	
@@ -161,6 +166,12 @@ public plugin_natives()
 	
 	register_native("LibTFC_Player_SetNumTeamKills", "_LibTFC_Player_SetNumTeamKills");
 	register_native("LibTFC_Player_GetNumTeamKills", "_LibTFC_Player_GetNumTeamKills");
+}
+
+
+public _LibTFC_Player_IsPlayer(iPlugin, iParams)
+{
+	return (1 <= get_param(1) <= g_iMaxPlayers);
 }
 
 
