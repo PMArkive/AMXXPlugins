@@ -174,3 +174,33 @@ native LibTFC_Weapon_SetNextPrimaryAttack(weapon, Float:next_attack);
  * @return The weapons next primary attack time.
  */
 native Float:LibTFC_Weapon_GetNextPrimaryAttack(weapon);
+
+/**
+ * Sets the weapons next reload time.
+ *
+ * @param weapon		The weapon.
+ * @param next_reload		The next reload time.
+ * 
+ * @noreturn
+ */
+native LibTFC_Weapon_SetNextReload(weapon, Float:next_reload);
+
+/**
+ * Gets the weapons next reload time.
+ *
+ * @param weapon		The weapon.
+ * 
+ * @return The weapons next reload time.
+ */
+native Float:LibTFC_Weapon_GetNextReload(weapon);
+
+/**
+ * Sends an animation sequence to a weapons owner.
+ * You can find the sequence indexes in a model viewer.
+ *
+ * @param weapon		The weapon.
+ * @param anim_sequence		The animation sequence to send.
+ * 
+ * @return  True on success, false otherwise.
+ */
+native bool:LibTFC_Weapon_SendAnimation(weapon, anim_sequence);

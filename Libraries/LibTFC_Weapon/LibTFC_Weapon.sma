@@ -3,9 +3,10 @@
 #include <engine>
 #include <hamsandwich>
 #include "../libtfc_weapon"
+#include "../libtfc_player"
 
 #define PLUGIN "Lib TFC: Weapon"
-#define VERSION "0.1"
+#define VERSION "0.3"
 #define AUTHOR "hlstriker"
 
 
@@ -41,6 +42,32 @@ public plugin_natives()
 
 	register_native("LibTFC_Weapon_SetNextPrimaryAttack", "_LibTFC_Weapon_SetNextPrimaryAttack");
 	register_native("LibTFC_Weapon_GetNextPrimaryAttack", "_LibTFC_Weapon_GetNextPrimaryAttack");
+
+	register_native("LibTFC_Weapon_SetNextReload", "_LibTFC_Weapon_SetNextReload");
+	register_native("LibTFC_Weapon_GetNextReload", "_LibTFC_Weapon_GetNextReload");
+
+	register_native("LibTFC_Weapon_SendAnimation", "_LibTFC_Weapon_SendAnimation");
+}
+
+
+public _LibTFC_Weapon_SendAnimation(iPlugin, iParams)
+{
+	new iWeapon = get_param(1);
+	new iOwner = entity_get_edict2(iWeapon, EV_ENT_owner);
+	if(!LibTFC_Player_IsPlayer(iOwner))
+	{
+		return false;
+	}
+
+	new iAnim = get_param(2);
+	entity_set_int(iOwner, EV_INT_weaponanim, iAnim);
+
+	message_begin_f(MSG_ONE, SVC_WEAPONANIM, _, iOwner);
+	write_byte(iAnim);
+	write_byte(entity_get_int(iWeapon, EV_INT_body));
+	message_end();
+	
+	return true;
 }
 
 
@@ -197,4 +224,15 @@ public _LibTFC_Weapon_GetName(iPlugin, iParams)
 	FreeHamItemInfo(itemInfo);
 
 	return set_string(2, szInfo, get_param(3));
+}
+
+
+public _LibTFC_Weapon_SetNextReload(iPlugin, iParams)
+{
+	return set_ent_data_float(get_param(1), "CBasePlayerWeapon", "m_flNextReload", get_param_f(2));
+}
+
+public Float:_LibTFC_Weapon_GetNextReload(iPlugin, iParams)
+{
+	return get_ent_data_float(get_param(1), "CBasePlayerWeapon", "m_flNextReload");
 }
