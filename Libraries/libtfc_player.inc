@@ -5,6 +5,46 @@
 
 
 /**
+ * Called when the player spawns.
+ *
+ * @param client    Client index
+ *
+ * @noreturn
+ */
+forward LibTFC_Player_OnSpawn(client);
+
+/**
+ * Called when the player dies.
+ *
+ * @param client    Client index
+ *
+ * @noreturn
+ */
+forward LibTFC_Player_OnDeath(client);
+
+/**
+ * Called when the player changes team.
+ *
+ * @param client    Client index
+ * @param new_tean  The client's new team
+ *
+ * @noreturn
+ */
+forward LibTFC_Player_OnChangeTeam(client, TeamTFC:new_team);
+
+/**
+ * Called when the player changes class.
+ *
+ * @param client    Client index
+ * @param new_class The client's new class
+ *
+ * @noreturn
+ */
+forward LibTFC_Player_OnChangeClass(client, PlayerClassTFC:new_class);
+
+
+
+/**
  * Checks to see if an entity is a player.
  *
  * @param entity		The entity to check.
@@ -12,6 +52,14 @@
  * @return		Returns true if the entity is a player, false otherwise.
  */
 native LibTFC_Player_IsPlayer(entity);
+
+/**
+ * Checks to see if a player is alive.
+ * This returns true even if the player is feigning.
+ *
+ * @return		Returns true if the player is alive, false otherwise.
+ */
+native LibTFC_Player_IsAlive(client);
 
 
 /**

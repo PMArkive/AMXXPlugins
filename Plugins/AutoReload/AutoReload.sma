@@ -2,9 +2,9 @@
 #include <amxmisc>
 #include <engine>
 #include <hamsandwich>
-#include "../../Libraries/libtfc_weapon"
-#include "../../Libraries/libtfc_player"
-#include "../../Libraries/libtfc_const"
+#include "../../Libraries/libtfc_weapon.inc"
+#include "../../Libraries/libtfc_player.inc"
+#include "../../Libraries/libtfc_const.inc"
 
 
 new const PLUGIN[] = "Auto Reload";

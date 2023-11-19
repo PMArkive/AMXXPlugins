@@ -3,10 +3,10 @@
 #include <engine>
 #include <hamsandwich>
 #include <orpheu>
-#include "../libtfc_const"
-#include "../libtfc_player"
-#include "../libtfc_misc"
-#include "../libtfc_timers"
+#include "../libtfc_const.inc"
+#include "../libtfc_player.inc"
+#include "../libtfc_misc.inc"
+#include "../libtfc_timers.inc"
 
 #define PLUGIN "Lib TFC: Player"
 #define VERSION "0.1"
@@ -17,8 +17,13 @@ new OrpheuFunction:g_OrphFunc_TeamFortress_TeamSet;
 new OrpheuFunction:g_OrphFunc_TeamFortress_SetSpeed;
 new OrpheuFunction:g_OrphFunc_ChangeClass;
 
-new bool:g_bIsForceChangingTeams;
 new g_iMaxPlayers;
+new bool:g_bIsForceChangingTeams;
+
+new g_iForwardOnSpawn       = -1;
+new g_iForwardOnDeath       = -1;
+new g_iForwardOnChangeTeam  = -1;
+new g_iForwardOnChangeClass = -1;
 
 
 public plugin_init()
@@ -28,12 +33,37 @@ public plugin_init()
 
 	g_iMaxPlayers = get_maxplayers();
 	
-	g_OrphFunc_TeamFortress_TeamGetNoPlayers = OrpheuGetFunction("TeamFortress_TeamGetNoPlayers");	// sub_3007BA40
-	g_OrphFunc_TeamFortress_TeamSet = OrpheuGetFunction("TeamFortress_TeamSet", "CBasePlayer");	// sub_30046D90
-	g_OrphFunc_TeamFortress_SetSpeed = OrpheuGetFunction("TeamFortress_SetSpeed", "CBasePlayer");	// sub_30046540
-	g_OrphFunc_ChangeClass = OrpheuGetFunction("ChangeClass", "CBasePlayer");	// sub_30044F60
+	g_OrphFunc_TeamFortress_TeamGetNoPlayers = OrpheuGetFunction("TeamFortress_TeamGetNoPlayers");         // sub_3007BA40
+	g_OrphFunc_TeamFortress_TeamSet          = OrpheuGetFunction("TeamFortress_TeamSet", "CBasePlayer");   // sub_30046D90
+	g_OrphFunc_TeamFortress_SetSpeed         = OrpheuGetFunction("TeamFortress_SetSpeed", "CBasePlayer");  // sub_30046540
+	g_OrphFunc_ChangeClass                   = OrpheuGetFunction("ChangeClass", "CBasePlayer");            // sub_30044F60
 	
+	OrpheuRegisterHook(g_OrphFunc_TeamFortress_TeamSet, "OnOrph_TeamFortress_TeamSet", OrpheuHookPre);
 	OrpheuRegisterHook(g_OrphFunc_TeamFortress_TeamGetNoPlayers, "OnOrph_TeamFortress_TeamGetNoPlayers", OrpheuHookPre);
+	OrpheuRegisterHook(g_OrphFunc_ChangeClass, "OnOrph_ChangeClass", OrpheuHookPre);
+
+	RegisterHam(Ham_TFC_Killed, "player", "OnKilled_Post", 1);
+
+	register_event("ResetHUD", "Event_ResetHUD_Dead", "bd"); // Use "ResetHUD" instead of "Spectator" to detect when a player goes spec. "Spectator" is called after the flag is dropped.
+	register_event("ResetHUD", "Event_ResetHUD_Alive", "be");
+
+	// register_message(get_user_msgid("Spectator"), "msg_Spectator");
+
+	g_iForwardOnSpawn       = CreateMultiForward("LibTFC_Player_OnSpawn", ET_IGNORE, FP_CELL);
+	g_iForwardOnDeath       = CreateMultiForward("LibTFC_Player_OnDeath", ET_IGNORE, FP_CELL);
+	g_iForwardOnChangeTeam  = CreateMultiForward("LibTFC_Player_OnChangeTeam", ET_IGNORE, FP_CELL, FP_CELL);
+	g_iForwardOnChangeClass = CreateMultiForward("LibTFC_Player_OnChangeClass", ET_IGNORE, FP_CELL, FP_CELL);
+
+	// Make sure we block "fullupdate" so players can't call our ResetHUD hooks at will.
+	register_clcmd("fullupdate", "Command_BlockCommand");
+}
+
+public plugin_end()
+{
+	DestroyForward(g_iForwardOnSpawn);
+	DestroyForward(g_iForwardOnDeath);
+	DestroyForward(g_iForwardOnChangeTeam);
+	DestroyForward(g_iForwardOnChangeClass);
 }
 
 public plugin_natives()
@@ -41,6 +71,7 @@ public plugin_natives()
 	register_library("libtfc_player");
 	
 	register_native("LibTFC_Player_IsPlayer", "_LibTFC_Player_IsPlayer");
+	register_native("LibTFC_Player_IsAlive", "_LibTFC_Player_IsAlive");
 
 	register_native("LibTFC_Player_SetPlayerClass", "_LibTFC_Player_SetPlayerClass");
 	register_native("LibTFC_Player_GetPlayerClass", "_LibTFC_Player_GetPlayerClass");
@@ -169,9 +200,24 @@ public plugin_natives()
 }
 
 
-public _LibTFC_Player_IsPlayer(iPlugin, iParams)
+public bool:_LibTFC_Player_IsPlayer(iPlugin, iParams)
 {
 	return (1 <= get_param(1) <= g_iMaxPlayers);
+}
+
+public bool:_LibTFC_Player_IsAlive(iPlugin, iParams)
+{
+	return bool:IsAlive(get_param(1));
+}
+
+IsAlive(iClient)
+{
+	if(GetCurrentTeam(iClient) == TFC_TEAM_SPECTATE) {
+		return false;
+	}
+
+	new iDeadFlag = entity_get_int(iClient, EV_INT_deadflag);
+	return (iDeadFlag == TFC_DEAD_NO || iDeadFlag == TFC_DEAD_FEIGNING);
 }
 
 
@@ -828,6 +874,17 @@ public Float:_LibTFC_Player_GetNextTeamOrClassChange(iPlugin, iParams)
 }
 
 
+public OrpheuHookReturn:OnOrph_TeamFortress_TeamSet(iClient, iTeam)
+{
+	OnChangeTeam(iClient, iTeam);
+	return OrpheuIgnored;
+}
+
+OnChangeTeam(iClient, iNewTeam)
+{
+	Forward_OnChangeTeam(iClient, iNewTeam);
+}
+
 public OrpheuHookReturn:OnOrph_TeamFortress_TeamGetNoPlayers(iTeam)
 {
 	// If we are force changing the player we need to return 0 players on the team.
@@ -893,4 +950,80 @@ public PlayerClassTFC:_LibTFC_Player_GetPlayerClass(iPlugin, iParams)
 PlayerClassTFC:GetPlayerClass(iClient)
 {
 	return PlayerClassTFC:entity_get_int(iClient, EV_INT_playerclass);
+}
+
+
+public Command_BlockCommand(iClient)
+{
+	return PLUGIN_HANDLED;
+}
+
+public Event_ResetHUD_Alive(iClient)
+{
+	// Use this for when the player is fully alive. Using Ham_Spawn pre and post is unreliable.
+	OnSpawn(iClient);
+}
+
+OnSpawn(iClient)
+{
+	if(!IsAlive(iClient))
+	{
+		return;
+	}
+
+	// TODO Fix the issue of spawn being called when a player switches teams while alive.
+	// Spawn will be called right before the player dies.
+	Forward_OnSpawn(iClient);
+}
+
+public OnKilled_Post(iClient)
+{
+	// At this point the player is fully dead. Don't use the DeathMsg event to hook death.
+	OnDeath(iClient);
+}
+
+public Event_ResetHUD_Dead(iClient)
+{
+	// Detecting death from going spectator.
+	OnDeath(iClient);
+}
+
+OnDeath(iClient)
+{
+	Forward_OnDeath(iClient);
+}
+
+public OrpheuHookReturn:OnOrph_ChangeClass(iClient, iClass)
+{
+	OnChangeClass(iClient, iClass);
+	return OrpheuIgnored;
+}
+
+OnChangeClass(iClient, iNewClass)
+{
+	Forward_OnChangeClass(iClient, iNewClass);
+}
+
+Forward_OnSpawn(iClient)
+{
+	static iReturn;
+	ExecuteForward(g_iForwardOnSpawn, iReturn, iClient)
+}
+
+Forward_OnDeath(iClient)
+{
+	static iReturn;
+	ExecuteForward(g_iForwardOnDeath, iReturn, iClient)
+}
+
+Forward_OnChangeTeam(iClient, iNewTeam)
+{
+	static iReturn;
+	ExecuteForward(g_iForwardOnChangeTeam, iReturn, iClient, iNewTeam)
+}
+
+Forward_OnChangeClass(iClient, iNewClass)
+{
+	static iReturn;
+	ExecuteForward(g_iForwardOnChangeClass, iReturn, iClient, iNewClass)
 }

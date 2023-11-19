@@ -4,9 +4,9 @@
 #include <hamsandwich>
 #include <orpheu>
 #include <orpheu_advanced>
-#include "../libtfc_const"
-#include "../libtfc_timers"
-#include "../libtfc_player"
+#include "../libtfc_const.inc"
+#include "../libtfc_timers.inc"
+#include "../libtfc_player.inc"
 
 #define PLUGIN "Lib TFC: Timers"
 #define VERSION "0.1"

@@ -2,8 +2,8 @@
 #include <fakemeta>
 #include <engine>
 #include <orpheu>
-#include "../libtfc_const"
-#include "../libtfc_misc"
+#include "../libtfc_const.inc"
+#include "../libtfc_misc.inc"
 
 #define PLUGIN "Lib TFC: Misc"
 #define VERSION "0.1"

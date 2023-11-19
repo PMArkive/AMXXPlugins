@@ -2,8 +2,8 @@
 #include <fakemeta>
 #include <engine>
 #include <hamsandwich>
-#include "../libtfc_weapon"
-#include "../libtfc_player"
+#include "../libtfc_weapon.inc"
+#include "../libtfc_player.inc"
 
 #define PLUGIN "Lib TFC: Weapon"
 #define VERSION "0.3"
