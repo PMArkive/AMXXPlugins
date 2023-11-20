@@ -20,6 +20,10 @@ new OrpheuFunction:g_OrphFunc_ChangeClass;
 new g_iMaxPlayers;
 new bool:g_bIsForceChangingTeams;
 
+// This is needed since ResetHud is called right before the player switches teams while they are alive.
+// It's also needed to prevent OnDeath from being called when the player joins spectate after connecting.
+new bool:g_bIsSpawned[TFC_PLAYER_BUFFER];
+
 new g_iForwardOnSpawn       = -1;
 new g_iForwardOnDeath       = -1;
 new g_iForwardOnChangeTeam  = -1;
@@ -983,8 +987,13 @@ OnSpawn(iClient)
 		return;
 	}
 
-	// TODO Fix the issue of spawn being called when a player switches teams while alive.
-	// Spawn will be called right before the player dies.
+	// If the player was already spawned, they couldn't have spawned again.
+	// TODO: Respawning by other means should be handled separately.
+	if(g_bIsSpawned[iClient]) {
+		return;
+	}
+
+	g_bIsSpawned[iClient] = true;
 	Forward_OnSpawn(iClient);
 }
 
@@ -1002,7 +1011,18 @@ public Event_ResetHUD_Dead(iClient)
 
 OnDeath(iClient)
 {
+	// If the player was never spawned, they couldn't have died.
+	if(!g_bIsSpawned[iClient]) {
+		return;
+	}
+
+	g_bIsSpawned[iClient] = false;
 	Forward_OnDeath(iClient);
+}
+
+public client_disconnected(iClient, bool:drop, message[], maxlen)
+{
+	g_bIsSpawned[iClient] = false;
 }
 
 public OrpheuHookReturn:OnOrph_ChangeClass(iClient, iClass)
