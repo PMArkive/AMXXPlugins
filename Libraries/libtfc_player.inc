@@ -27,20 +27,22 @@ forward LibTFC_Player_OnDeath(client);
  *
  * @param client    Client index
  * @param new_tean  The client's new team
+ * @param old_team  The client's old team
  *
  * @noreturn
  */
-forward LibTFC_Player_OnChangeTeam(client, TeamTFC:new_team);
+forward LibTFC_Player_OnChangeTeam(client, TeamTFC:new_team, TeamTFC:old_team);
 
 /**
  * Called when the player changes class.
  *
  * @param client    Client index
  * @param new_class The client's new class
+ * @param old_class The client's old class
  *
  * @noreturn
  */
-forward LibTFC_Player_OnChangeClass(client, PlayerClassTFC:new_class);
+forward LibTFC_Player_OnChangeClass(client, PlayerClassTFC:new_class, PlayerClassTFC:old_class);
 
 
 

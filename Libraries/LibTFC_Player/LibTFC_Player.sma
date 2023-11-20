@@ -24,6 +24,9 @@ new bool:g_bIsForceChangingTeams;
 // It's also needed to prevent OnDeath from being called when the player joins spectate after connecting.
 new bool:g_bIsSpawned[TFC_PLAYER_BUFFER];
 
+// This is needed to call the ChangeTeam forward when the player goes spectate.
+new TeamTFC:g_iLastSetTeam[TFC_PLAYER_BUFFER];
+
 new g_iForwardOnSpawn       = -1;
 new g_iForwardOnDeath       = -1;
 new g_iForwardOnChangeTeam  = -1;
@@ -55,8 +58,8 @@ public plugin_init()
 
 	g_iForwardOnSpawn       = CreateMultiForward("LibTFC_Player_OnSpawn", ET_IGNORE, FP_CELL);
 	g_iForwardOnDeath       = CreateMultiForward("LibTFC_Player_OnDeath", ET_IGNORE, FP_CELL);
-	g_iForwardOnChangeTeam  = CreateMultiForward("LibTFC_Player_OnChangeTeam", ET_IGNORE, FP_CELL, FP_CELL);
-	g_iForwardOnChangeClass = CreateMultiForward("LibTFC_Player_OnChangeClass", ET_IGNORE, FP_CELL, FP_CELL);
+	g_iForwardOnChangeTeam  = CreateMultiForward("LibTFC_Player_OnChangeTeam", ET_IGNORE, FP_CELL, FP_CELL, FP_CELL);
+	g_iForwardOnChangeClass = CreateMultiForward("LibTFC_Player_OnChangeClass", ET_IGNORE, FP_CELL, FP_CELL, FP_CELL);
 
 	// Make sure we block "fullupdate" so players can't call our ResetHUD hooks at will.
 	register_clcmd("fullupdate", "Command_BlockCommand");
@@ -890,15 +893,20 @@ public Float:_LibTFC_Player_GetNextTeamOrClassChange(iPlugin, iParams)
 }
 
 
-public OrpheuHookReturn:OnOrph_TeamFortress_TeamSet(iClient, iTeam)
+public OrpheuHookReturn:OnOrph_TeamFortress_TeamSet(iClient, TeamTFC:iNewTeam)
 {
-	OnChangeTeam(iClient, iTeam);
+	new TeamTFC:iOldTeam = GetCurrentTeam(iClient); // This will be their old team at this point.
+	if(iOldTeam == iNewTeam)
+		return OrpheuIgnored;
+
+	OnChangeTeam(iClient, iNewTeam, iOldTeam);
 	return OrpheuIgnored;
 }
 
-OnChangeTeam(iClient, iNewTeam)
+OnChangeTeam(iClient, TeamTFC:iNewTeam, TeamTFC:iOldTeam)
 {
-	Forward_OnChangeTeam(iClient, iNewTeam);
+	g_iLastSetTeam[iClient] = iNewTeam;
+	Forward_OnChangeTeam(iClient, iNewTeam, iOldTeam);
 }
 
 public OrpheuHookReturn:OnOrph_TeamFortress_TeamGetNoPlayers(iTeam)
@@ -1005,6 +1013,12 @@ public OnKilled_Post(iClient)
 
 public Event_ResetHUD_Dead(iClient)
 {
+	if(g_iLastSetTeam[iClient] != TFC_TEAM_SPECTATE) {
+		new TeamTFC:iOldTeam = g_iLastSetTeam[iClient];
+		g_iLastSetTeam[iClient] = TFC_TEAM_SPECTATE;
+		Forward_OnChangeTeam(iClient, TFC_TEAM_SPECTATE, iOldTeam);
+	}
+
 	// Detecting death from going spectator.
 	OnDeath(iClient);
 }
@@ -1023,17 +1037,22 @@ OnDeath(iClient)
 public client_disconnected(iClient, bool:drop, message[], maxlen)
 {
 	g_bIsSpawned[iClient] = false;
+	g_iLastSetTeam[iClient] = TFC_TEAM_SPECTATE;
 }
 
-public OrpheuHookReturn:OnOrph_ChangeClass(iClient, iClass)
+public OrpheuHookReturn:OnOrph_ChangeClass(iClient, iNewClass)
 {
-	OnChangeClass(iClient, iClass);
+	new iOldClass = _:GetPlayerClass(iClient); // This will be their old class at this point.
+	if(iOldClass == iNewClass)
+		return OrpheuIgnored;
+
+	OnChangeClass(iClient, iNewClass, iOldClass);
 	return OrpheuIgnored;
 }
 
-OnChangeClass(iClient, iNewClass)
+OnChangeClass(iClient, iNewClass, iOldClass)
 {
-	Forward_OnChangeClass(iClient, iNewClass);
+	Forward_OnChangeClass(iClient, iNewClass, iOldClass);
 }
 
 Forward_OnSpawn(iClient)
@@ -1048,14 +1067,14 @@ Forward_OnDeath(iClient)
 	ExecuteForward(g_iForwardOnDeath, iReturn, iClient)
 }
 
-Forward_OnChangeTeam(iClient, iNewTeam)
+Forward_OnChangeTeam(iClient, TeamTFC:iNewTeam, TeamTFC:iOldTeam)
 {
 	static iReturn;
-	ExecuteForward(g_iForwardOnChangeTeam, iReturn, iClient, iNewTeam)
+	ExecuteForward(g_iForwardOnChangeTeam, iReturn, iClient, _:iNewTeam, _:iOldTeam)
 }
 
-Forward_OnChangeClass(iClient, iNewClass)
+Forward_OnChangeClass(iClient, iNewClass, iOldClass)
 {
 	static iReturn;
-	ExecuteForward(g_iForwardOnChangeClass, iReturn, iClient, iNewClass)
+	ExecuteForward(g_iForwardOnChangeClass, iReturn, iClient, iNewClass, iOldClass)
 }
