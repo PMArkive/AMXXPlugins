@@ -18,25 +18,16 @@ const SEQ_RELOAD_GRENADE_LAUNCHER = 4;
 const SEQ_RELOAD_PIPE_LAUNCHER = 6;
 const SEQ_RELOAD_RPG = 8;
 
-new const SZ_WEAPONS_WITH_CLIP[][] =
-{
-	"tf_weapon_shotgun",
-	"tf_weapon_supershotgun",
-	"tf_weapon_gl",
-	"tf_weapon_rpg",
-	"tf_weapon_pl",
-};
-
 
 public plugin_init()
 {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 	register_cvar("auto_reload_version", VERSION, FCVAR_SERVER | FCVAR_SPONLY);
 	
-	for(new i=0; i<sizeof(SZ_WEAPONS_WITH_CLIP); i++)
+	for(new i=0; i<sizeof(TFC_CLIP_WEAPON_CLASSNAMES); i++)
 	{
-		RegisterHam(Ham_Item_PostFrame, SZ_WEAPONS_WITH_CLIP[i], "OnItemPostFrame_Pre", 0);
-		RegisterHam(Ham_Item_PostFrame, SZ_WEAPONS_WITH_CLIP[i], "OnItemPostFrame_Post", 1);
+		RegisterHam(Ham_Item_PostFrame, TFC_CLIP_WEAPON_CLASSNAMES[i], "OnItemPostFrame_Pre", 0);
+		RegisterHam(Ham_Item_PostFrame, TFC_CLIP_WEAPON_CLASSNAMES[i], "OnItemPostFrame_Post", 1);
 	}
 }
 

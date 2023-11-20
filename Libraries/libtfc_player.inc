@@ -449,6 +449,21 @@ native TeamTFC:LibTFC_Player_GetTeam(client);
 
 
 /**
+ * Sets the player's current health value.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_SetHealthValue(client, Float:armor_value);
+
+/**
+ * Gets the player's current health value.
+ *
+ * @return		The player's current health value.
+ */
+native Float:LibTFC_Player_GetHealthValue(client);
+
+
+/**
  * Sets the player's current armor value.
  *
  * @noreturn

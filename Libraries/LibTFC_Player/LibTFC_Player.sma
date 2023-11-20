@@ -135,6 +135,9 @@ public plugin_natives()
 	register_native("LibTFC_Player_SetArmorValue", "_LibTFC_Player_SetArmorValue");
 	register_native("LibTFC_Player_GetArmorValue", "_LibTFC_Player_GetArmorValue");
 	
+	register_native("LibTFC_Player_SetHealthValue", "_LibTFC_Player_SetHealthValue");
+	register_native("LibTFC_Player_GetHealthValue", "_LibTFC_Player_GetHealthValue");
+	
 	register_native("LibTFC_Player_ChangeTeam", "_LibTFC_Player_ChangeTeam");
 	register_native("LibTFC_Player_GetTeam", "_LibTFC_Player_GetTeam");
 	
@@ -460,6 +463,17 @@ public _LibTFC_Player_GetLives(iPlugin, iParams)
 }
 
 
+public _LibTFC_Player_SetHealthValue(iPlugin, iParams)
+{
+	entity_set_float(get_param(1), EV_FL_health, get_param_f(2));
+}
+
+public Float:_LibTFC_Player_GetHealthValue(iPlugin, iParams)
+{
+	return entity_get_float(get_param(1), EV_FL_health);
+}
+
+
 public _LibTFC_Player_SetArmorValue(iPlugin, iParams)
 {
 	entity_set_float(get_param(1), EV_FL_armorvalue, get_param_f(2));
@@ -725,8 +739,6 @@ public bool:_LibTFC_Player_SetGrenadeType(iPlugin, iParams)
 	new iClient = get_param(1);
 	new GrenadeSlotTFC:grenadeSlot = GrenadeSlotTFC:get_param(2);
 	new GrenadeTypeTFC:grenadeType = GrenadeTypeTFC:get_param(3);
-	
-	
 	
 	switch(grenadeSlot)
 	{

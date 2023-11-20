@@ -9,7 +9,7 @@
 
 
 /**
- * The maximum number of players in a server.
+ * Deadflag values.
  */
 #define TFC_DEAD_NO          0 // Alive
 #define TFC_DEAD_DYING       1 // Playing death animation or still falling off of a ledge waiting to hit ground
@@ -104,7 +104,7 @@
 #define TFC_WPNFLAG_BIOWEAPON        2
 #define TFC_WPNFLAG_MEDIKIT          4
 #define TFC_WPNFLAG_SPANNER          8
-#define TFC_WPNFLAG_AXE              16
+#define TFC_WPNFLAG_CROWBAR          16
 #define TFC_WPNFLAG_SNIPER_RIFLE     32
 #define TFC_WPNFLAG_AUTO_RIFLE       64
 #define TFC_WPNFLAG_SHOTGUN          128
@@ -122,7 +122,6 @@
 #define TFC_WPNFLAG_RAILGUN          524288
 
 
-
 /*
  * Weapon IDs.
 */
@@ -133,7 +132,7 @@ enum WeaponTFC
 	TFC_WPNID_BIOWEAPON, // Seems to be unused
 	TFC_WPNID_MEDIKIT,
 	TFC_WPNID_SPANNER,
-	TFC_WPNID_AXE,
+	TFC_WPNID_CROWBAR,	
 	TFC_WPNID_SNIPER_RIFLE,
 	TFC_WPNID_AUTO_RIFLE,
 	TFC_WPNID_TF_SHOTGUN,
@@ -155,6 +154,59 @@ enum WeaponTFC
 	TFC_WPNID_BENCHMARK  // Seems to be unused
 };
 
+
+/*
+ * Weapon entity classnames.
+ */
+#define TFC_WPNCLASS_CROWBAR           "tf_weapon_axe"
+#define TFC_WPNCLASS_MEDIKIT           "tf_weapon_medikit"
+#define TFC_WPNCLASS_SPANNER           "tf_weapon_spanner"
+#define TFC_WPNCLASS_KNIFE             "tf_weapon_knife"
+#define TFC_WPNCLASS_SNIPER_RIFLE      "tf_weapon_sniperrifle"
+#define TFC_WPNCLASS_SHOTGUN           "tf_weapon_shotgun"
+#define TFC_WPNCLASS_RAILGUN           "tf_weapon_railgun"
+#define TFC_WPNCLASS_TRANQ             "tf_weapon_tranq"
+#define TFC_WPNCLASS_AUTO_RIFLE        "tf_weapon_autorifle"
+#define TFC_WPNCLASS_SUPER_SHOTGUN     "tf_weapon_supershotgun"
+#define TFC_WPNCLASS_NAILGUN           "tf_weapon_ng"
+#define TFC_WPNCLASS_SUPER_NAILGUN     "tf_weapon_superng"
+#define TFC_WPNCLASS_GRENADE_LAUNCHER  "tf_weapon_gl"
+#define TFC_WPNCLASS_PIPEBOMB_LAUNCHER "tf_weapon_pl"
+#define TFC_WPNCLASS_FLAMETHROWER      "tf_weapon_flamethrower"
+#define TFC_WPNCLASS_INCENDIARY        "tf_weapon_ic"
+#define TFC_WPNCLASS_ASSAULT_CANNON    "tf_weapon_ac"
+#define TFC_WPNCLASS_ROCKET_LAUNCHER   "tf_weapon_rpg"
+
+new const stock TFC_WEAPON_CLASSNAMES[] =
+{
+	TFC_WPNCLASS_CROWBAR,
+	TFC_WPNCLASS_MEDIKIT,
+	TFC_WPNCLASS_SPANNER,
+	TFC_WPNCLASS_KNIFE,
+	TFC_WPNCLASS_SNIPER_RIFLE,
+	TFC_WPNCLASS_SHOTGUN,
+	TFC_WPNCLASS_RAILGUN,
+	TFC_WPNCLASS_TRANQ,
+	TFC_WPNCLASS_AUTO_RIFLE,
+	TFC_WPNCLASS_SUPER_SHOTGUN,
+	TFC_WPNCLASS_NAILGUN,
+	TFC_WPNCLASS_SUPER_NAILGUN,
+	TFC_WPNCLASS_GRENADE_LAUNCHER,
+	TFC_WPNCLASS_PIPEBOMB_LAUNCHER,
+	TFC_WPNCLASS_FLAMETHROWER,
+	TFC_WPNCLASS_INCENDIARY,
+	TFC_WPNCLASS_ASSAULT_CANNON,
+	TFC_WPNCLASS_ROCKET_LAUNCHER
+};
+
+new const stock TFC_CLIP_WEAPON_CLASSNAMES[][] =
+{
+	TFC_WPNCLASS_SHOTGUN,
+	TFC_WPNCLASS_SUPER_SHOTGUN,
+	TFC_WPNCLASS_GRENADE_LAUNCHER,
+	TFC_WPNCLASS_PIPEBOMB_LAUNCHER,
+	TFC_WPNCLASS_ROCKET_LAUNCHER,
+};
 
 /*
  * Player classes.
@@ -217,6 +269,31 @@ enum GrenadeTypeTFC
 	TFC_GRENTYPE_EMP,        // 8
 	TFC_GRENTYPE_CALTROP,    // 9
 	TFC_GRENTYPE_FLASH       // 10 - Not used
+};
+
+
+/*
+ * Grenade entity classnames.
+ */
+#define TFC_GRENCLASS_NORMAL     "tf_weapon_normalgrenade"
+#define TFC_GRENCLASS_CONCUSSION "tf_weapon_concussiongrenade"
+#define TFC_GRENCLASS_NAIL       "tf_weapon_nailgrenade"
+#define TFC_GRENCLASS_MIRV       "tf_weapon_mirvgrenade"
+#define TFC_GRENCLASS_NAPALM     "tf_weapon_napalmgrenade"
+#define TFC_GRENCLASS_GAS        "tf_weapon_gasgrenade"
+#define TFC_GRENCLASS_EMP        "tf_weapon_empgrenade"
+#define TFC_GRENCLASS_CALTROP    "tf_weapon_caltropgrenade"
+
+new const stock TFC_GRENADE_CLASSNAMES[][] =
+{
+	TFC_GRENCLASS_NORMAL,
+	TFC_GRENCLASS_CONCUSSION,
+	TFC_GRENCLASS_NAIL,
+	TFC_GRENCLASS_MIRV,
+	TFC_GRENCLASS_NAPALM,
+	TFC_GRENCLASS_GAS,
+	TFC_GRENCLASS_EMP,
+	TFC_GRENCLASS_CALTROP
 };
 
 
