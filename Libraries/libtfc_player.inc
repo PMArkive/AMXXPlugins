@@ -305,6 +305,26 @@ native Float:LibTFC_Player_GetLastMedicCallTime(client);
  */
 native WeaponTFC:LibTFC_Player_GetDeployedWeaponID(client);
 
+/**
+ * Gets the weapon entity for a given weapon ID.
+ * If the player doesn't have the weapon, it will return 0.
+ *
+ * @param weapon_id		The weapon id to search for.
+ *
+ * @return		The player's weapon entity for the given weapon ID.
+ */
+native LibTFC_Player_GetWeaponEntityById(client, WeaponTFC:weapon_id);
+
+/**
+ * Gets the weapon entity for a given weapon class name.
+ * If the player doesn't have the weapon, it will return 0.
+ *
+ * @param class_name		The weapon class name to search for.
+ *
+ * @return		The player's weapon entity for the given weapon class name.
+ */
+native LibTFC_Player_GetWeaponEntityByWeaponClass(client, class_name[]);
+
 
 /**
  * Sets if a player has a teleporter exit or not.

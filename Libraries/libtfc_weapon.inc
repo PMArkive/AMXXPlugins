@@ -5,6 +5,35 @@
 
 
 /**
+ * Creates a weapon.
+ *
+ * @param weapon_id		The weapon id to create.
+ * 
+ * @return		Returns the weapon entity created, or 0 on failure.
+ */
+native LibTFC_Weapon_Create(WeaponTFC:weapon_id);
+
+/**
+ * Gets a weapon classname by weapon id.
+ * 
+ * @param weapon_id			The weapon id to get the classname of.
+ * @param class_name			Buffer to copy value to.
+ * @param maxlength			Maximum buffer size.
+ *
+ * @return					Number of cells copied from the buffer.
+ */
+native LibTFC_Weapon_GetWeaponClassByWeaponId(WeaponTFC:weapon_id, class_name[], maxlength);
+
+/**
+ * Gets a weapon id by weapon classname.
+ * 
+ * @param class_name			The weapon classname to get the id of.
+ *
+ * @return					The weapon id, TFC_WPNID_NONE if not found.
+ */
+native WeaponTFC:LibTFC_Weapon_GetWeaponIdByWeaponClass(class_name[]);
+
+/**
  * Gets the slot this weapon uses.
  *
  * @param weapon		The weapon.

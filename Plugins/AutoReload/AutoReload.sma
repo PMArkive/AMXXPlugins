@@ -84,7 +84,7 @@ public OnItemPostFrame_Post(iWeapon)
 
 	switch(LibTFC_Weapon_GetId(iWeapon))
 	{
-		case TFC_WPNID_TF_SHOTGUN: LibTFC_Weapon_SendAnimation(iWeapon, SEQ_RELOAD_SHOTGUN);
+		case TFC_WPNID_SHOTGUN: LibTFC_Weapon_SendAnimation(iWeapon, SEQ_RELOAD_SHOTGUN);
 		case TFC_WPNID_SUPER_SHOTGUN: LibTFC_Weapon_SendAnimation(iWeapon, SEQ_RELOAD_SUPER_SHOTGUN);
 		case TFC_WPNID_GRENADE_LAUNCHER: LibTFC_Weapon_SendAnimation(iWeapon, SEQ_RELOAD_GRENADE_LAUNCHER);
 		case TFC_WPNID_PIPEBOMB_LAUNCHER: LibTFC_Weapon_SendAnimation(iWeapon, SEQ_RELOAD_PIPE_LAUNCHER);

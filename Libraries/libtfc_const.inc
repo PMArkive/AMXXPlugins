@@ -132,10 +132,10 @@ enum WeaponTFC
 	TFC_WPNID_BIOWEAPON, // Seems to be unused
 	TFC_WPNID_MEDIKIT,
 	TFC_WPNID_SPANNER,
-	TFC_WPNID_CROWBAR,	
+	TFC_WPNID_CROWBAR,
 	TFC_WPNID_SNIPER_RIFLE,
 	TFC_WPNID_AUTO_RIFLE,
-	TFC_WPNID_TF_SHOTGUN,
+	TFC_WPNID_SHOTGUN,
 	TFC_WPNID_SUPER_SHOTGUN,
 	TFC_WPNID_NAILGUN,
 	TFC_WPNID_SUPER_NAILGUN,
@@ -158,45 +158,46 @@ enum WeaponTFC
 /*
  * Weapon entity classnames.
  */
-#define TFC_WPNCLASS_CROWBAR           "tf_weapon_axe"
+#define TFC_WPNCLASS_MAX_LENGTH        23
 #define TFC_WPNCLASS_MEDIKIT           "tf_weapon_medikit"
 #define TFC_WPNCLASS_SPANNER           "tf_weapon_spanner"
-#define TFC_WPNCLASS_KNIFE             "tf_weapon_knife"
+#define TFC_WPNCLASS_CROWBAR           "tf_weapon_axe"
 #define TFC_WPNCLASS_SNIPER_RIFLE      "tf_weapon_sniperrifle"
-#define TFC_WPNCLASS_SHOTGUN           "tf_weapon_shotgun"
-#define TFC_WPNCLASS_RAILGUN           "tf_weapon_railgun"
-#define TFC_WPNCLASS_TRANQ             "tf_weapon_tranq"
 #define TFC_WPNCLASS_AUTO_RIFLE        "tf_weapon_autorifle"
+#define TFC_WPNCLASS_SHOTGUN           "tf_weapon_shotgun"
 #define TFC_WPNCLASS_SUPER_SHOTGUN     "tf_weapon_supershotgun"
 #define TFC_WPNCLASS_NAILGUN           "tf_weapon_ng"
 #define TFC_WPNCLASS_SUPER_NAILGUN     "tf_weapon_superng"
 #define TFC_WPNCLASS_GRENADE_LAUNCHER  "tf_weapon_gl"
-#define TFC_WPNCLASS_PIPEBOMB_LAUNCHER "tf_weapon_pl"
 #define TFC_WPNCLASS_FLAMETHROWER      "tf_weapon_flamethrower"
+#define TFC_WPNCLASS_ROCKET_LAUNCHER   "tf_weapon_rpg"
 #define TFC_WPNCLASS_INCENDIARY        "tf_weapon_ic"
 #define TFC_WPNCLASS_ASSAULT_CANNON    "tf_weapon_ac"
-#define TFC_WPNCLASS_ROCKET_LAUNCHER   "tf_weapon_rpg"
+#define TFC_WPNCLASS_TRANQ             "tf_weapon_tranq"
+#define TFC_WPNCLASS_RAILGUN           "tf_weapon_railgun"
+#define TFC_WPNCLASS_PIPEBOMB_LAUNCHER "tf_weapon_pl"
+#define TFC_WPNCLASS_KNIFE             "tf_weapon_knife"
 
 new const stock TFC_WEAPON_CLASSNAMES[] =
 {
-	TFC_WPNCLASS_CROWBAR,
 	TFC_WPNCLASS_MEDIKIT,
 	TFC_WPNCLASS_SPANNER,
-	TFC_WPNCLASS_KNIFE,
+	TFC_WPNCLASS_CROWBAR,
 	TFC_WPNCLASS_SNIPER_RIFLE,
-	TFC_WPNCLASS_SHOTGUN,
-	TFC_WPNCLASS_RAILGUN,
-	TFC_WPNCLASS_TRANQ,
 	TFC_WPNCLASS_AUTO_RIFLE,
+	TFC_WPNCLASS_SHOTGUN,
 	TFC_WPNCLASS_SUPER_SHOTGUN,
 	TFC_WPNCLASS_NAILGUN,
 	TFC_WPNCLASS_SUPER_NAILGUN,
 	TFC_WPNCLASS_GRENADE_LAUNCHER,
-	TFC_WPNCLASS_PIPEBOMB_LAUNCHER,
 	TFC_WPNCLASS_FLAMETHROWER,
+	TFC_WPNCLASS_ROCKET_LAUNCHER,
 	TFC_WPNCLASS_INCENDIARY,
 	TFC_WPNCLASS_ASSAULT_CANNON,
-	TFC_WPNCLASS_ROCKET_LAUNCHER
+	TFC_WPNCLASS_TRANQ,
+	TFC_WPNCLASS_RAILGUN,
+	TFC_WPNCLASS_PIPEBOMB_LAUNCHER,
+	TFC_WPNCLASS_KNIFE,
 };
 
 new const stock TFC_CLIP_WEAPON_CLASSNAMES[][] =

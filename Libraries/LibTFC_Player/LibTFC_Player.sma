@@ -5,6 +5,7 @@
 #include <orpheu>
 #include "../libtfc_const.inc"
 #include "../libtfc_player.inc"
+#include "../libtfc_weapon.inc"
 #include "../libtfc_misc.inc"
 #include "../libtfc_timers.inc"
 
@@ -173,6 +174,9 @@ public plugin_natives()
 	register_native("LibTFC_Player_GetHasTeleporterExit", "_LibTFC_Player_GetHasTeleporterExit");
 	
 	register_native("LibTFC_Player_GetDeployedWeaponID", "_LibTFC_Player_GetDeployedWeaponID");
+
+	register_native("LibTFC_Player_GetWeaponEntityById", "_LibTFC_Player_GetWeaponEntityById");
+	register_native("LibTFC_Player_GetWeaponEntityByWeaponClass", "_LibTFC_Player_GetWeaponEntityByWeaponClass");
 	
 	register_native("LibTFC_Player_SetLastMedicCallTime", "_LibTFC_Player_SetLastMedicCallTime");
 	register_native("LibTFC_Player_GetLastMedicCallTime", "_LibTFC_Player_GetLastMedicCallTime");
@@ -385,6 +389,26 @@ public Float:_LibTFC_Player_GetLastMedicCallTime(iPlugin, iParams)
 public WeaponTFC:_LibTFC_Player_GetDeployedWeaponID(iPlugin, iParams)
 {
 	return WeaponTFC:floatround(get_ent_data_float(get_param(1), "CBaseEntity", "current_weapon"));
+}
+
+
+public _LibTFC_Player_GetWeaponEntityById(iPlugin, iParams)
+{
+	new szClassName[TFC_WPNCLASS_MAX_LENGTH];
+	LibTFC_Weapon_GetWeaponClassByWeaponId(WeaponTFC:get_param(2), szClassName, charsmax(szClassName));
+	
+	return LibTFC_Player_GetWeaponEntityByWeaponClass(get_param(1), szClassName);
+}
+
+public _LibTFC_Player_GetWeaponEntityByWeaponClass(iPlugin, iParams)
+{
+	new iClient = get_param(1);
+	new szClassName[TFC_WPNCLASS_MAX_LENGTH];
+	get_string(2, szClassName, charsmax(szClassName));
+
+	// TODO: Loop through player's weapon entities and return the one with the matching weapon class name.
+
+	return 0;
 }
 
 

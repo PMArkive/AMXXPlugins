@@ -22,9 +22,9 @@ native LibTFC_Misc_GetClassDefaultWeaponFlags(PlayerClassTFC:class);
  * @param team_name			Buffer to copy value to.
  * @param maxlength			Maximum buffer size.
  *
- * @return					True on success, false otherwise.
+ * @return					Number of cells copied from the buffer.
  */
-native bool:LibTFC_Misc_GetTeamName(TeamTFC:team, team_name[], maxlength);
+native LibTFC_Misc_GetTeamName(TeamTFC:team, team_name[], maxlength);
 
 
 /**
