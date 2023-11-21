@@ -110,24 +110,30 @@ public WeaponTFC:_LibTFC_Weapon_GetWeaponIdByWeaponClass(iPlugin, iParams)
 	new szClassName[TFC_WPNCLASS_MAX_LENGTH];
 	get_string(1, szClassName, charsmax(szClassName));
 
-	if(equal(szClassName, TFC_WPNCLASS_MEDIKIT))           return TFC_WPNID_MEDIKIT;
-	if(equal(szClassName, TFC_WPNCLASS_SPANNER))           return TFC_WPNID_SPANNER;
-	if(equal(szClassName, TFC_WPNCLASS_CROWBAR))           return TFC_WPNID_CROWBAR;
-	if(equal(szClassName, TFC_WPNCLASS_SNIPER_RIFLE))      return TFC_WPNID_SNIPER_RIFLE;
-	if(equal(szClassName, TFC_WPNCLASS_AUTO_RIFLE))        return TFC_WPNID_AUTO_RIFLE;
-	if(equal(szClassName, TFC_WPNCLASS_SHOTGUN))           return TFC_WPNID_SHOTGUN;
-	if(equal(szClassName, TFC_WPNCLASS_SUPER_SHOTGUN))     return TFC_WPNID_SUPER_SHOTGUN;
-	if(equal(szClassName, TFC_WPNCLASS_NAILGUN))           return TFC_WPNID_NAILGUN;
-	if(equal(szClassName, TFC_WPNCLASS_SUPER_NAILGUN))     return TFC_WPNID_SUPER_NAILGUN;
-	if(equal(szClassName, TFC_WPNCLASS_GRENADE_LAUNCHER))  return TFC_WPNID_GRENADE_LAUNCHER;
-	if(equal(szClassName, TFC_WPNCLASS_FLAMETHROWER))      return TFC_WPNID_FLAMETHROWER;
-	if(equal(szClassName, TFC_WPNCLASS_ROCKET_LAUNCHER))   return TFC_WPNID_ROCKET_LAUNCHER;
-	if(equal(szClassName, TFC_WPNCLASS_INCENDIARY))        return TFC_WPNID_INCENDIARY;
-	if(equal(szClassName, TFC_WPNCLASS_ASSAULT_CANNON))    return TFC_WPNID_ASSAULT_CANNON;
-	if(equal(szClassName, TFC_WPNCLASS_TRANQ))             return TFC_WPNID_TRANQ;
-	if(equal(szClassName, TFC_WPNCLASS_RAILGUN))           return TFC_WPNID_RAILGUN;
-	if(equal(szClassName, TFC_WPNCLASS_PIPEBOMB_LAUNCHER)) return TFC_WPNID_PIPEBOMB_LAUNCHER;
-	if(equal(szClassName, TFC_WPNCLASS_KNIFE))             return TFC_WPNID_KNIFE;
+	// It must be more characters than "tf_weapon_" (10)
+	if(strlen(szClassName) <= 10)
+	{
+		return TFC_WPNID_NONE;
+	}
+
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_MEDIKIT))           return TFC_WPNID_MEDIKIT;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_SPANNER))           return TFC_WPNID_SPANNER;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_CROWBAR))           return TFC_WPNID_CROWBAR;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_SNIPER_RIFLE))      return TFC_WPNID_SNIPER_RIFLE;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_AUTO_RIFLE))        return TFC_WPNID_AUTO_RIFLE;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_SHOTGUN))           return TFC_WPNID_SHOTGUN;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_SUPER_SHOTGUN))     return TFC_WPNID_SUPER_SHOTGUN;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_NAILGUN))           return TFC_WPNID_NAILGUN;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_SUPER_NAILGUN))     return TFC_WPNID_SUPER_NAILGUN;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_GRENADE_LAUNCHER))  return TFC_WPNID_GRENADE_LAUNCHER;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_FLAMETHROWER))      return TFC_WPNID_FLAMETHROWER;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_ROCKET_LAUNCHER))   return TFC_WPNID_ROCKET_LAUNCHER;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_INCENDIARY))        return TFC_WPNID_INCENDIARY;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_ASSAULT_CANNON))    return TFC_WPNID_ASSAULT_CANNON;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_TRANQ))             return TFC_WPNID_TRANQ;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_RAILGUN))           return TFC_WPNID_RAILGUN;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_PIPEBOMB_LAUNCHER)) return TFC_WPNID_PIPEBOMB_LAUNCHER;
+	if(equal(szClassName[10], TFC_SHORTWPNCLASS_KNIFE))             return TFC_WPNID_KNIFE;
 
 	return TFC_WPNID_NONE;
 }
