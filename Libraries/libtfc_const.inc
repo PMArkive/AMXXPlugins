@@ -7,6 +7,8 @@
 #define TFC_MAX_PLAYERS 32                     // The maximum number of players in a server.
 #define TFC_PLAYER_BUFFER TFC_MAX_PLAYERS + 1  // The maximum number of players in a server + 1.
 
+#define TFC_MAX_ITEM_TYPES 6
+
 
 /**
  * Deadflag values.

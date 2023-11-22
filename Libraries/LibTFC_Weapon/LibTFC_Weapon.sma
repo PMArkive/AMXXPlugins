@@ -21,7 +21,7 @@ public plugin_natives()
 {
 	register_library("libtfc_weapon");
 	
-	register_native("LibTFC_Weapon_Create", "_LibTFC_Weapon_Create");
+	register_native("LibTFC_Weapon_CreateWeaponByWeaponId", "_LibTFC_Weapon_CreateWeaponByWeaponId");
 	register_native("LibTFC_Weapon_GetWeaponClassByWeaponId", "_LibTFC_Weapon_GetWeaponClassByWeaponId");
 	register_native("LibTFC_Weapon_GetWeaponIdByWeaponClass", "_LibTFC_Weapon_GetWeaponIdByWeaponClass");
 
@@ -55,7 +55,7 @@ public plugin_natives()
 }
 
 
-public _LibTFC_Weapon_Create(iPlugin, iParams)
+public _LibTFC_Weapon_CreateWeaponByWeaponId(iPlugin, iParams)
 {
 	new WeaponTFC:weaponId = WeaponTFC:get_param(1);
 
@@ -65,14 +65,15 @@ public _LibTFC_Weapon_Create(iPlugin, iParams)
 		return 0;
 	}
 
-	new iWeapon = create_entity(szClassName);
+	new iWeapon = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, szClassName));
 	if(iWeapon < 1)
 	{
 		return 0;
 	}
 	
 	entity_set_int(iWeapon, EV_INT_spawnflags, entity_get_int(iWeapon, EV_INT_spawnflags) | SF_NORESPAWN);
-	
+	dllfunc(DLLFunc_Spawn, iWeapon);
+
 	return iWeapon;
 }
 

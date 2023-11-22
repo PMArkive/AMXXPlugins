@@ -173,6 +173,8 @@ public plugin_natives()
 	register_native("LibTFC_Player_SetHasTeleporterExit", "_LibTFC_Player_SetHasTeleporterExit");
 	register_native("LibTFC_Player_GetHasTeleporterExit", "_LibTFC_Player_GetHasTeleporterExit");
 	
+	register_native("LibTFC_Player_AttachWeaponEntity", "_LibTFC_Player_AttachWeaponEntity");
+
 	register_native("LibTFC_Player_GetDeployedWeaponID", "_LibTFC_Player_GetDeployedWeaponID");
 
 	register_native("LibTFC_Player_GetWeaponEntityById", "_LibTFC_Player_GetWeaponEntityById");
@@ -227,6 +229,18 @@ public bool:_LibTFC_Player_IsAlive(iPlugin, iParams)
 IsAlive(iClient)
 {
 	if(GetCurrentTeam(iClient) == TFC_TEAM_SPECTATE) {
+		return false;
+	}
+
+	if(GetPlayerClass(iClient) == TFC_CLASS_NONE) {
+		return false;
+	}
+
+	if(entity_get_int(iClient, EV_INT_flags) == FL_SPECTATOR) {
+		return false;
+	}
+
+	if(entity_get_float(iClient, EV_FL_health) <= 0.0) {
 		return false;
 	}
 
@@ -386,6 +400,22 @@ public Float:_LibTFC_Player_GetLastMedicCallTime(iPlugin, iParams)
 }
 
 
+public _LibTFC_Player_AttachWeaponEntity(iPlugin, iParams)
+{
+	new iClient = get_param(1);
+	new iWeapon = get_param(2);
+
+	// TODO: Detatch the weapon from another player if it's already attached to them.
+
+
+	dllfunc(DLLFunc_Touch, iWeapon, iClient);
+
+	// if(get_param(3)) {
+	// 	// TODO: Force deploy the weapon.
+	// }
+}
+
+
 public WeaponTFC:_LibTFC_Player_GetDeployedWeaponID(iPlugin, iParams)
 {
 	return WeaponTFC:floatround(get_ent_data_float(get_param(1), "CBaseEntity", "current_weapon"));
@@ -406,7 +436,21 @@ public _LibTFC_Player_GetWeaponEntityByWeaponClass(iPlugin, iParams)
 	new szClassName[TFC_WPNCLASS_MAX_LENGTH];
 	get_string(2, szClassName, charsmax(szClassName));
 
-	// TODO: Loop through player's weapon entities and return the one with the matching weapon class name.
+	new szItemClassName[32], iItem;
+	for(new i = 0; i < TFC_MAX_ITEM_TYPES; i++)
+	{
+		iItem = get_ent_data_entity(iClient, "CBasePlayer", "m_rgpPlayerItems", i);
+
+		while(iItem != -1)
+		{
+			entity_get_string(iItem, EV_SZ_classname, szItemClassName, charsmax(szItemClassName));
+			if(equal(szItemClassName, szClassName)) {
+				return iItem;
+			}
+
+			iItem = get_ent_data_entity(iItem, "CBasePlayerItem", "m_pNext");
+		}
+	}
 
 	return 0;
 }
@@ -923,6 +967,8 @@ public OrpheuHookReturn:OnOrph_TeamFortress_TeamSet(iClient, TeamTFC:iNewTeam)
 	if(iOldTeam == iNewTeam)
 		return OrpheuIgnored;
 
+	// TODO: Fix the issue where this is called when the player doesn't actually change teams when they switch teams too quickly.
+
 	OnChangeTeam(iClient, iNewTeam, iOldTeam);
 	return OrpheuIgnored;
 }
@@ -1016,12 +1062,6 @@ OnSpawn(iClient)
 {
 	if(!IsAlive(iClient))
 	{
-		return;
-	}
-
-	// If the player was already spawned, they couldn't have spawned again.
-	// TODO: Respawning by other means should be handled separately.
-	if(g_bIsSpawned[iClient]) {
 		return;
 	}
 

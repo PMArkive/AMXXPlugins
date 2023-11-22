@@ -274,6 +274,16 @@ native Float:LibTFC_Player_GetLastMedicCallTime(client);
 
 
 /**
+ * Attaches a weapon entity to a player.
+ *
+ * @param weapon_entity		The weapon entity to attach to the player.
+ * @param force_deploy		Should the weapon be forcefully deployed or not.
+ *
+ * @noreturn
+ */
+native LibTFC_Player_AttachWeaponEntity(client, weapon_entity, bool:force_deploy=false);
+
+/**
  * Sets the player's currently deployed weapon entity.
  *
  * @return		True on success, false otherwise.

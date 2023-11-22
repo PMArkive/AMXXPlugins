@@ -5,13 +5,13 @@
 
 
 /**
- * Creates a weapon.
+ * Creates a weapon by weapon id.
  *
  * @param weapon_id		The weapon id to create.
  * 
  * @return		Returns the weapon entity created, or 0 on failure.
  */
-native LibTFC_Weapon_Create(WeaponTFC:weapon_id);
+native LibTFC_Weapon_CreateWeaponByWeaponId(WeaponTFC:weapon_id);
 
 /**
  * Gets a weapon classname by weapon id.
